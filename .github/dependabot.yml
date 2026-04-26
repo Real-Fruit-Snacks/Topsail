@@ -14,6 +14,12 @@ updates:
       go-deps:
         patterns:
           - '*'
+    ignore:
+      # Pinned in lockstep with the project's Go floor (currently 1.23).
+      # Bump x/term manually when bumping the Go directive in go.mod and
+      # the matrix in ci.yml.
+      - dependency-name: golang.org/x/term
+      - dependency-name: golang.org/x/sys
 
   - package-ecosystem: github-actions
     directory: /

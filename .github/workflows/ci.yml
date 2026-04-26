@@ -39,8 +39,12 @@ jobs:
             exit 1
           fi
       - name: goimports formatting
+        # Pinned: goimports tracks the Go release cadence. @latest can pull
+        # an x/tools version that requires a Go newer than the lint job's
+        # toolchain, so we pin to a version known to match this matrix.
+        # Bump in lockstep with the Go floor in go.mod / CONTRIBUTING.md.
         run: |
-          go install golang.org/x/tools/cmd/goimports@latest
+          go install golang.org/x/tools/cmd/goimports@v0.30.0
           diff=$(goimports -l -local github.com/Real-Fruit-Snacks/topsail .)
           if [ -n "$diff" ]; then
             echo "::error::Formatting drift (run 'make fmt'):"
