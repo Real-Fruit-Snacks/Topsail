@@ -25,10 +25,33 @@ Download the appropriate archive from the [latest release](https://github.com/Re
 
 ```bash
 # Linux / macOS
-curl -L -o topsail.tar.gz https://github.com/Real-Fruit-Snacks/topsail/releases/latest/download/topsail_$(uname -s)_$(uname -m).tar.gz
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+curl -fL -o topsail.tar.gz \
+  "https://github.com/Real-Fruit-Snacks/topsail/releases/latest/download/topsail_${OS}_${ARCH}.tar.gz"
 tar xzf topsail.tar.gz
 ./topsail --list
 ```
+
+### Linux packages (.deb / .rpm / .apk)
+
+Each release also publishes Debian, RPM, and Alpine packages. Pick the right
+one for your distro from the [latest release](https://github.com/Real-Fruit-Snacks/topsail/releases/latest):
+
+```bash
+# Debian / Ubuntu
+sudo dpkg -i topsail_<arch>.deb
+
+# Fedora / RHEL / openSUSE
+sudo rpm -i topsail_<arch>.rpm
+
+# Alpine
+sudo apk add --allow-untrusted topsail_<arch>.apk
+```
+
+Each package installs the binary to `/usr/bin/topsail`, man pages under
+`/usr/share/man/man1/`, and shell completions for bash / zsh / fish in
+their canonical locations.
 
 ### Build from source
 

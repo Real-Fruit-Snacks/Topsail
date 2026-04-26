@@ -232,10 +232,22 @@
 <section>
   <h2>Quick start</h2>
   <h3>Pre-built binary (Linux / macOS)</h3>
-<pre><code>curl -L -o topsail.tar.gz \
-  https://github.com/Real-Fruit-Snacks/topsail/releases/latest/download/topsail_$(uname -s)_$(uname -m).tar.gz
+<pre><code>OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+curl -fL -o topsail.tar.gz \
+  "https://github.com/Real-Fruit-Snacks/topsail/releases/latest/download/topsail_${OS}_${ARCH}.tar.gz"
 tar xzf topsail.tar.gz
 ./topsail --list</code></pre>
+
+  <h3>Linux packages</h3>
+<pre><code># Debian / Ubuntu
+sudo dpkg -i topsail_amd64.deb
+
+# Fedora / RHEL / openSUSE
+sudo rpm -i topsail_amd64.rpm
+
+# Alpine
+sudo apk add --allow-untrusted topsail_amd64.apk</code></pre>
 
   <h3>Build from source</h3>
 <pre><code>git clone https://github.com/Real-Fruit-Snacks/topsail

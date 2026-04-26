@@ -5,6 +5,9 @@ project_name: topsail
 before:
   hooks:
     - go mod tidy
+    # Generate shell completions and man pages, then bundle them into
+    # each archive (see `archives.files` below).
+    - go run ./cmd/gendocs -out dist/docs
 
 builds:
   - id: topsail
@@ -29,10 +32,13 @@ builds:
     mod_timestamp: '{{ .CommitTimestamp }}'
 
 archives:
+  # Drop the version from the archive name so the
+  # https://github.com/.../releases/latest/download/topsail_<os>_<arch>.tar.gz
+  # URL pattern works regardless of the current latest tag.
   - id: default
     format: tar.gz
     name_template: >-
-      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+      {{ .ProjectName }}_{{ .Os }}_{{ .Arch }}
     format_overrides:
       - goos: windows
         format: zip
@@ -40,6 +46,38 @@ archives:
       - LICENSE
       - README.md
       - CHANGELOG.md
+      - src: dist/docs/completions/*
+        dst: completions
+      - src: dist/docs/man/*
+        dst: man
+
+# Linux distribution packages for users who prefer dpkg/rpm/apk over
+# tarballs. Packages bundle the binary, man pages, and shell completions
+# in their canonical filesystem locations.
+nfpms:
+  - id: linux-packages
+    package_name: topsail
+    vendor: Real-Fruit-Snacks
+    homepage: https://github.com/Real-Fruit-Snacks/topsail
+    maintainer: Real-Fruit-Snacks <noreply@github.com>
+    description: |-
+      A BusyBox-style multi-call binary in Go.
+      74 Unix utilities, one statically-linked executable.
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+    bindir: /usr/bin
+    contents:
+      - src: dist/docs/man/*.1
+        dst: /usr/share/man/man1/
+      - src: dist/docs/completions/topsail.bash
+        dst: /usr/share/bash-completion/completions/topsail
+      - src: dist/docs/completions/_topsail
+        dst: /usr/share/zsh/site-functions/_topsail
+      - src: dist/docs/completions/topsail.fish
+        dst: /usr/share/fish/vendor_completions.d/topsail.fish
 
 checksum:
   name_template: 'checksums.txt'

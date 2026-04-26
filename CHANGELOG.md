@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-04-26
+
+### Added
+
+- **Linux packages**: each release now ships `.deb`, `.rpm`, and `.apk` archives alongside the tarballs, generated via goreleaser's `nfpms` block. Packages install the binary to `/usr/bin/topsail`, man pages under `/usr/share/man/man1/`, and shell completions to the canonical bash / zsh / fish locations.
+- **Shell completions** for bash, zsh, and fish bundled into every release archive (under `completions/`) and into the Linux packages.
+- **Man pages** for `topsail(1)` and one per applet, generated from each applet's Usage string. Bundled into archives (under `man/`) and Linux packages (under `/usr/share/man/man1/`).
+- New `cmd/gendocs` tool emits the completions and man pages; runs as a goreleaser `before:` hook so artifacts stay in sync with the registry.
+- New `internal/applets` package centralises the blank-import list so `cmd/topsail` and `cmd/gendocs` share a single source of truth for the registered applets.
+
+### Changed
+
+- **Asset names dropped the version**: archives are now `topsail_<os>_<arch>.tar.gz` (and `.zip` on Windows) rather than `topsail_<version>_<os>_<arch>.tar.gz`. The `https://github.com/.../releases/latest/download/topsail_linux_amd64.tar.gz` URL now resolves correctly regardless of the latest tag.
+- README and Pages quick-start `curl` snippets now use proper case + arch translation. `uname -s` is lowercased and `uname -m` is mapped (`x86_64` → `amd64`, `aarch64` → `arm64`).
+
+### Fixed
+
+- README quick-start `curl` URL was 404-ing because `uname -s` returns `Linux`/`Darwin` (capitalized) and `uname -m` returns `x86_64`/`aarch64`, neither of which matched the goreleaser asset naming.
+
 ## [1.0.0] - 2026-04-25
 
 The first stable release. Ships the full **74-applet roster** across six platforms with cosign-signed checksums and per-archive SBOMs.
@@ -61,4 +80,5 @@ Captured in detail in [`ARCHITECTURE.md`](ARCHITECTURE.md#documented-divergences
 - `basename` / `dirname` use the OS-agnostic `path` package, treating `/` as the separator on every platform.
 - `tail -f` follow mode and symbolic file modes (`u+rwx`) are queued for follow-up.
 
+[1.1.0]: https://github.com/Real-Fruit-Snacks/topsail/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Real-Fruit-Snacks/topsail/releases/tag/v1.0.0
