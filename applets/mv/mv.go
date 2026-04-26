@@ -121,11 +121,16 @@ func Main(argv []string) int {
 	return rc
 }
 
-// move tries os.Rename first (atomic, fast) and falls back to copy+delete
+// renameFunc is the rename primitive move() calls first. It is a package
+// var so tests can simulate cross-device failures without needing a real
+// cross-device setup.
+var renameFunc = os.Rename
+
+// move tries renameFunc first (atomic, fast) and falls back to copy+delete
 // when rename fails — typically because the source and destination are
 // on different filesystems.
 func move(src, dst string) error {
-	if err := os.Rename(src, dst); err == nil {
+	if err := renameFunc(src, dst); err == nil {
 		return nil
 	}
 	srcInfo, err := os.Lstat(src)
