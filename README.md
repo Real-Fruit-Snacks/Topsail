@@ -1,6 +1,6 @@
 # topsail
 
-[![Go Version](https://img.shields.io/badge/go-1.23%2B-00ADD8.svg)](https://go.dev)
+[![Go Version](https://img.shields.io/badge/go-1.25%2B-00ADD8.svg)](https://go.dev)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/Real-Fruit-Snacks/topsail/actions/workflows/ci.yml/badge.svg)](https://github.com/Real-Fruit-Snacks/topsail/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/Real-Fruit-Snacks/topsail.svg)](https://pkg.go.dev/github.com/Real-Fruit-Snacks/topsail)

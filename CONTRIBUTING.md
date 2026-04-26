@@ -10,7 +10,7 @@ Participation is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). Please r
 
 You need:
 
-- **Go 1.23 or later** — `go.mod` declares the minimum.
+- **Go 1.25 or later** — `go.mod` declares the minimum. Go 1.25 is required to pick up the standard-library fix for [GO-2026-4602](https://pkg.go.dev/vuln/GO-2026-4602).
 - **make** — used by the per-wave protocol and most local commands.
 - **goimports**, **golangci-lint v2**, **govulncheck** — installed via `go install` from `go install golang.org/x/tools/cmd/goimports@latest`, `github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest`, and `golang.org/x/vuln/cmd/govulncheck@latest`. Make sure `~/go/bin` (or `%USERPROFILE%\go\bin` on Windows) is on your `PATH`.
 
