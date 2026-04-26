@@ -7,7 +7,7 @@ before:
     - go mod tidy
     # Generate shell completions and man pages, then bundle them into
     # each archive (see `archives.files` below).
-    - go run ./cmd/gendocs -out dist/docs
+    - go run ./cmd/gendocs -out build/docs
 
 builds:
   - id: topsail
@@ -46,9 +46,9 @@ archives:
       - LICENSE
       - README.md
       - CHANGELOG.md
-      - src: dist/docs/completions/*
+      - src: build/docs/completions/*
         dst: completions
-      - src: dist/docs/man/*
+      - src: build/docs/man/*
         dst: man
 
 # Linux distribution packages for users who prefer dpkg/rpm/apk over
@@ -70,13 +70,13 @@ nfpms:
       - apk
     bindir: /usr/bin
     contents:
-      - src: dist/docs/man/*.1
+      - src: build/docs/man/*.1
         dst: /usr/share/man/man1/
-      - src: dist/docs/completions/topsail.bash
+      - src: build/docs/completions/topsail.bash
         dst: /usr/share/bash-completion/completions/topsail
-      - src: dist/docs/completions/_topsail
+      - src: build/docs/completions/_topsail
         dst: /usr/share/zsh/site-functions/_topsail
-      - src: dist/docs/completions/topsail.fish
+      - src: build/docs/completions/topsail.fish
         dst: /usr/share/fish/vendor_completions.d/topsail.fish
 
 checksum:
