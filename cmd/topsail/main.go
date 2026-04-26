@@ -9,8 +9,24 @@ import (
 	"os"
 
 	"github.com/Real-Fruit-Snacks/topsail/internal/cli"
+
 	// Applet imports — one line per applet package, alphabetized.
-	// Wave 0 ships with no applets registered; Wave 1 begins populating.
+	// Each blank import runs that package's init() to self-register.
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/basename"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/cat"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/cp"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/dirname"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/echo"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/false"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/mkdir"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/mv"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/printf"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/pwd"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/rm"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/rmdir"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/touch"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/true"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/yes"
 )
 
 func main() {
