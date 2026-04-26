@@ -1,31 +1,15 @@
 version: 2
 updates:
-  - package-ecosystem: gomod
-    directory: /
-    schedule:
-      interval: weekly
-      day: monday
-      time: '06:00'
-    open-pull-requests-limit: 10
-    commit-message:
-      prefix: chore
-      include: scope
-    groups:
-      go-deps:
-        patterns:
-          - '*'
-    ignore:
-      # Pinned in lockstep with the project's Go floor (currently 1.23).
-      # Bump x/term manually when bumping the Go directive in go.mod and
-      # the matrix in ci.yml.
-      - dependency-name: golang.org/x/term
-      - dependency-name: golang.org/x/sys
-
+  # GitHub Actions only. The gomod ecosystem was dropped because our
+  # only direct Go dep (golang.org/x/term) and its transitive (x/sys)
+  # are pinned in lockstep with the project's Go floor; Dependabot
+  # bumps to "latest" force the go directive past 1.23 and break
+  # compatibility. govulncheck still scans the dep graph for actual
+  # vulnerabilities; routine version churn we handle manually.
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
       time: '06:00'
     open-pull-requests-limit: 5
     commit-message:
