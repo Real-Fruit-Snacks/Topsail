@@ -1,345 +1,577 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0B1220">
-<title>topsail — Unix utilities, in one Go binary, anywhere</title>
-<meta name="description" content="A BusyBox-style multi-call binary in Go. 84 Unix utilities, one ~3 MB statically-linked executable, native on Linux, macOS, and Windows.">
-<meta property="og:title" content="topsail — Unix utilities, in one Go binary, anywhere">
-<meta property="og:description" content="A BusyBox-style multi-call binary in Go. 84 Unix utilities, one ~3 MB statically-linked executable, native on Linux, macOS, and Windows.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://real-fruit-snacks.github.io/topsail/">
-<meta property="og:image" content="https://raw.githubusercontent.com/Real-Fruit-Snacks/topsail/main/docs/assets/logo-dark.svg">
-<style>
-  :root {
-    --bg: #0B1220;
-    --bg-card: #111827;
-    --bg-code: #0F172A;
-    --fg: #F8FAFC;
-    --muted: #94A3B8;
-    --accent: #00ADD8;
-    --accent-2: #5EEAD4;
-    --border: #1F2937;
-    --code: #C7D2FE;
-    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.35);
-  }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--fg);
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    font-size: 16px;
-    line-height: 1.6;
-  }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
-  pre {
-    background: var(--bg-code);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px 18px;
-    overflow-x: auto;
-    font-size: 14px;
-    line-height: 1.55;
-    color: var(--code);
-    box-shadow: var(--shadow);
-  }
-  code { background: var(--bg-code); padding: 1px 6px; border-radius: 4px; color: var(--code); font-size: .92em; }
-  pre code { background: transparent; padding: 0; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>topsail — Unix utilities, in one Go binary</title>
+    <meta name="description" content="A BusyBox-style multi-call binary in Go. 84 Unix utilities, one ~3 MB statically-linked executable, native on Linux, macOS, and Windows. Cosign-signed releases with SBOMs.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='24' text-anchor='middle' font-family='Inter,sans-serif' font-size='24' font-weight='800' fill='%2374c7ec'%3ET%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta property="og:title" content="topsail — Unix utilities, in one Go binary">
+    <meta property="og:description" content="A BusyBox-style multi-call binary in Go. 84 Unix utilities, one ~3 MB statically-linked executable, native on Linux, macOS, and Windows.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://real-fruit-snacks.github.io/topsail/">
+    <meta property="og:image" content="https://raw.githubusercontent.com/Real-Fruit-Snacks/topsail/main/docs/assets/logo-dark.svg">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --accent1:#74c7ec;--accent2:#b4befe;--accentmid:#89b4fa;
+            --accentrgb:116,199,236;
+            --text:#cdd6f4;--sub1:#bac2de;--sub0:#a6adc8;
+            --ov2:#9399b2;--ov1:#7f849c;--ov0:#6c7086;
+            --sf2:#585b70;--sf1:#45475a;--sf0:#313244;
+            --base:#1e1e2e;--mantle:#181825;--crust:#11111b;
+            --green:#a6e3a1;--yellow:#f9e2af;--red:#f38ba8;
+            --peach:#fab387;--mauve:#cba6f7;--teal:#94e2d5;--pink:#f5c2e7;
+        }
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--crust);color:var(--text);line-height:1.7;overflow-x:hidden}
+        ::selection{background:rgba(var(--accentrgb),0.3);color:var(--text)}
+        .container{max-width:1140px;margin:0 auto;padding:0 28px}
+        code{font-family:'JetBrains Mono',monospace;background:var(--mantle);padding:2px 7px;border-radius:3px;font-size:.88em;color:var(--green)}
 
-  nav.top {
-    position: sticky; top: 0; z-index: 10;
-    background: rgba(11, 18, 32, .85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border);
-  }
-  nav.top .inner {
-    max-width: 1100px; margin: 0 auto;
-    padding: 14px 24px;
-    display: flex; align-items: center; gap: 24px;
-  }
-  nav.top .name { font-weight: 700; letter-spacing: 0.5px; }
-  nav.top .links { margin-left: auto; display: flex; gap: 18px; flex-wrap: wrap; }
-  nav.top a { color: var(--muted); }
-  nav.top a:hover { color: var(--fg); text-decoration: none; }
+        /* ── Nav ── */
+        .nav{position:fixed;top:0;left:0;right:0;height:56px;background:rgba(17,17,27,0.8);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(49,50,68,0.5);z-index:1000;display:flex;align-items:center;justify-content:center}
+        .nav-inner{max-width:1140px;width:100%;padding:0 28px;display:flex;align-items:center;justify-content:space-between}
+        .nav-logo{font-family:'Inter',sans-serif;font-size:16px;font-weight:700;color:var(--text);text-decoration:none}
+        .nav-links{display:flex;align-items:center;gap:28px}
+        .nav-links a{font-size:13px;font-weight:500;color:var(--ov0);text-decoration:none;transition:color .2s}
+        .nav-links a:hover{color:var(--text)}
+        .nav-cta{background:linear-gradient(135deg,var(--accent1),var(--accentmid));color:var(--crust);padding:7px 18px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:box-shadow .2s,transform .2s}
+        .nav-cta:hover{box-shadow:0 0 20px rgba(var(--accentrgb),0.3);transform:translateY(-1px)}
 
-  header.hero {
-    max-width: 1100px; margin: 0 auto;
-    padding: 80px 24px 48px;
-    text-align: center;
-  }
-  header.hero img.logo { width: min(620px, 100%); height: auto; display: block; margin: 0 auto 24px; }
-  header.hero p.tag { color: var(--muted); font-size: 18px; margin: 0 auto; max-width: 720px; }
-  header.hero .cta { margin-top: 28px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-  .btn {
-    display: inline-block;
-    padding: 11px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 15px;
-    border: 1px solid var(--border);
-  }
-  .btn.primary { background: var(--accent); color: #001520; border-color: var(--accent); }
-  .btn.primary:hover { background: var(--accent-2); color: #001520; text-decoration: none; }
-  .btn.secondary { background: transparent; color: var(--fg); }
-  .btn.secondary:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+        /* ── Hero ── */
+        .hero{padding:140px 0 80px;text-align:center;position:relative}
+        .hero::before{content:'';position:absolute;top:60px;left:50%;transform:translateX(-50%);width:800px;height:400px;background:radial-gradient(ellipse,rgba(var(--accentrgb),0.08) 0%,transparent 60%);pointer-events:none}
+        .hero-logo{position:relative;max-width:600px;margin:0 auto 32px}
+        .hero-logo img{width:100%;height:auto}
+        .hero-tagline{position:relative;font-size:clamp(24px,3.5vw,38px);font-weight:700;line-height:1.2;margin-bottom:16px;background:linear-gradient(135deg,var(--accent1),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero-desc{position:relative;font-size:16px;color:var(--ov0);max-width:580px;margin:0 auto 32px}
+        .hero-ctas{position:relative;display:flex;gap:12px;justify-content:center;margin-bottom:48px}
+        .btn-primary{background:linear-gradient(135deg,var(--accent1),var(--accentmid));color:var(--crust);padding:12px 28px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;text-decoration:none;transition:box-shadow .2s,transform .2s}
+        .btn-primary:hover{box-shadow:0 0 24px rgba(var(--accentrgb),0.35);transform:translateY(-2px)}
+        .btn-secondary{background:var(--sf0);color:var(--text);padding:12px 28px;border-radius:8px;border:1px solid var(--sf1);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;text-decoration:none;transition:all .2s}
+        .btn-secondary:hover{background:var(--sf1);border-color:var(--sf2)}
 
-  section { max-width: 1100px; margin: 0 auto; padding: 56px 24px; }
-  section h2 {
-    font-size: 28px; margin: 0 0 24px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  section h2::before {
-    content: ""; display: inline-block; width: 6px; height: 28px;
-    background: var(--accent); border-radius: 3px;
-  }
-  section h3 { font-size: 18px; margin: 24px 0 8px; color: var(--fg); }
+        /* ── Terminal ── */
+        .terminal{position:relative;max-width:800px;margin:0 auto;background:var(--mantle);border:1px solid var(--sf0);border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5),0 0 24px rgba(var(--accentrgb),0.06)}
+        .terminal-bar{background:var(--crust);padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--sf0)}
+        .terminal-dot{width:12px;height:12px;border-radius:50%}
+        .terminal-dot:nth-child(1){background:var(--red)}
+        .terminal-dot:nth-child(2){background:var(--yellow)}
+        .terminal-dot:nth-child(3){background:var(--green)}
+        .terminal-label{flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ov0)}
+        .terminal-body{padding:24px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.9;text-align:left}
+        .terminal-body pre{margin:0;white-space:pre-wrap;word-wrap:break-word}
+        .t-g{color:var(--green)}.t-b{color:var(--accent1)}.t-m{color:var(--sub0)}.t-p{color:var(--peach)}.t-y{color:var(--yellow)}
 
-  .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
-  .stat {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 22px 20px;
-    text-align: center;
-    box-shadow: var(--shadow);
-  }
-  .stat .num { font-size: 36px; font-weight: 700; color: var(--accent); display: block; line-height: 1; }
-  .stat .label { color: var(--muted); font-size: 14px; margin-top: 6px; display: block; }
+        /* ── Stats ── */
+        .stats{display:flex;justify-content:center;gap:40px;padding:60px 0;position:relative}
+        .stat{text-align:center}
+        .stat-num{font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:700;color:var(--accent1);line-height:1}
+        .stat-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sf2);margin-top:6px;letter-spacing:2px;text-transform:uppercase}
+        .stat-div{width:1px;height:48px;background:var(--sf0);align-self:center}
 
-  .grid-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
-  .feature {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px 22px;
-  }
-  .feature h3 { margin-top: 0; color: var(--accent-2); }
-  .feature p { color: var(--muted); margin: 8px 0 0; }
+        /* ── Sections ── */
+        section{padding:80px 0}
+        .section-label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--accent1);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px}
+        .section-title{font-size:clamp(28px,4vw,40px);font-weight:700;margin-bottom:12px;letter-spacing:-.02em}
+        .section-desc{font-size:15px;color:var(--ov0);margin-bottom:48px;max-width:620px}
+        .gradient-line{height:1px;background:linear-gradient(90deg,transparent,var(--accent1),var(--accent2),transparent);margin:0 auto;max-width:600px}
 
-  table.applets {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 8px;
-    font-size: 14px;
-  }
-  table.applets th, table.applets td {
-    text-align: left; padding: 12px 14px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: top;
-  }
-  table.applets th { color: var(--accent); font-weight: 600; width: 26%; }
-  table.applets code { white-space: nowrap; }
+        /* ── Bento ── */
+        .bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+        .bento-card{background:var(--mantle);border:1px solid var(--sf0);border-radius:12px;padding:28px;transition:all .25s;position:relative;overflow:hidden}
+        .bento-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent1),var(--accent2));opacity:0;transition:opacity .25s}
+        .bento-card:hover{transform:translateY(-3px);border-color:var(--sf1);box-shadow:0 12px 32px rgba(0,0,0,0.25),0 0 20px rgba(var(--accentrgb),0.06)}
+        .bento-card:hover::before{opacity:1}
+        .bento-hero{grid-column:span 2}
+        .bento-card h3{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--accent1);margin-bottom:8px}
+        .bento-card p{font-size:13.5px;color:var(--sub0);line-height:1.6}
+        .bento-card .mini-terminal{background:var(--crust);border-radius:8px;padding:14px;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;text-align:left}
+        .bento-stat{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+        .bento-stat .big{font-family:'JetBrains Mono',monospace;font-size:42px;font-weight:700;color:var(--accent1)}
+        .bento-stat .label{font-size:12px;color:var(--sf2);margin-top:4px;letter-spacing:1px}
 
-  .arch-flow {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 18px 22px;
-    overflow-x: auto;
-  }
-  .arch-flow pre { background: transparent; border: none; padding: 0; box-shadow: none; }
+        /* ── Pills ── */
+        .pill-group{margin-bottom:20px}
+        .pill-group-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ov0);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+        .pills{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+        .pill{background:var(--mantle);border:1px solid;border-radius:20px;padding:8px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;display:flex;align-items:center;gap:8px;transition:all .2s}
+        .pill:hover{background:var(--base);filter:brightness(1.25)}
+        .pill .alias{opacity:.55;font-size:11px;margin-left:auto}
+        /* Per-category accent colors. The color cascades to text + border;
+           the alias inherits and dims via opacity above. */
+        .pill-group[data-accent="green"]   .pill-group-label,
+        .pill-group[data-accent="green"]   .pill{color:var(--green);border-color:rgba(166,227,161,.35)}
+        .pill-group[data-accent="peach"]   .pill-group-label,
+        .pill-group[data-accent="peach"]   .pill{color:var(--peach);border-color:rgba(250,179,135,.35)}
+        .pill-group[data-accent="cyan"]    .pill-group-label,
+        .pill-group[data-accent="cyan"]    .pill{color:var(--accent1);border-color:rgba(116,199,236,.35)}
+        .pill-group[data-accent="mauve"]   .pill-group-label,
+        .pill-group[data-accent="mauve"]   .pill{color:var(--mauve);border-color:rgba(203,166,247,.35)}
+        .pill-group[data-accent="teal"]    .pill-group-label,
+        .pill-group[data-accent="teal"]    .pill{color:var(--teal);border-color:rgba(148,226,213,.35)}
+        .pill-group[data-accent="yellow"]  .pill-group-label,
+        .pill-group[data-accent="yellow"]  .pill{color:var(--yellow);border-color:rgba(249,226,175,.35)}
+        .pill-group[data-accent="red"]     .pill-group-label,
+        .pill-group[data-accent="red"]     .pill{color:var(--red);border-color:rgba(243,139,168,.35)}
+        .pill-group[data-accent="lavender"] .pill-group-label,
+        .pill-group[data-accent="lavender"] .pill{color:var(--accent2);border-color:rgba(180,190,254,.35)}
+        .pill-group[data-accent="blue"]    .pill-group-label,
+        .pill-group[data-accent="blue"]    .pill{color:var(--accentmid);border-color:rgba(137,180,250,.35)}
+        .pill-group[data-accent="pink"]    .pill-group-label,
+        .pill-group[data-accent="pink"]    .pill{color:var(--pink);border-color:rgba(245,194,231,.35)}
 
-  footer {
-    border-top: 1px solid var(--border);
-    margin-top: 56px;
-    padding: 32px 24px;
-    text-align: center;
-    color: var(--muted);
-    font-size: 14px;
-  }
-  footer a { color: var(--muted); }
-  footer a:hover { color: var(--fg); }
+        /* ── Arch ── */
+        .arch-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+        .arch-card{background:var(--mantle);border:1px solid var(--sf0);border-radius:12px;padding:28px;transition:border-color .2s}
+        .arch-card:hover{border-color:var(--sf1)}
+        .arch-num{display:inline-flex;width:30px;height:30px;background:linear-gradient(135deg,var(--accent1),var(--accentmid));color:var(--crust);border-radius:50%;align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-bottom:14px}
+        .arch-card h3{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--teal);margin-bottom:8px}
+        .arch-card p{font-size:13.5px;color:var(--sub0);line-height:1.6}
 
-  @media (max-width: 640px) {
-    nav.top .links { gap: 12px; }
-    header.hero { padding: 56px 20px 32px; }
-    header.hero p.tag { font-size: 16px; }
-    section { padding: 40px 20px; }
-    section h2 { font-size: 24px; }
-  }
-</style>
+        /* ── Two Col ── */
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+
+        /* ── Footer ── */
+        footer{padding:48px 0;margin-top:40px}
+        .footer-line{height:1px;background:linear-gradient(90deg,transparent,var(--accent1),var(--accent2),transparent);margin-bottom:48px}
+        .footer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px}
+        .footer-grid h4{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);margin-bottom:14px;letter-spacing:2px;text-transform:uppercase}
+        .footer-grid ul{list-style:none}
+        .footer-grid li{margin-bottom:8px}
+        .footer-grid a{color:var(--ov2);text-decoration:none;font-size:13px;transition:color .2s}
+        .footer-grid a:hover{color:var(--accent1)}
+        .footer-grid p{font-size:13px;color:var(--ov1);line-height:1.7}
+        .footer-bottom{text-align:center;margin-top:36px;padding-top:24px;border-top:1px solid var(--sf0);font-size:12px;color:var(--ov0)}
+
+        /* ── Animate ── */
+        .animate{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+        .animate.visible{opacity:1;transform:translateY(0)}
+        .animate-scale{opacity:0;transform:translateY(24px) scale(.97);transition:opacity .8s ease,transform .8s ease}
+        .animate-scale.visible{opacity:1;transform:translateY(0) scale(1)}
+
+        /* ── Responsive ── */
+        @media(max-width:960px){.bento{grid-template-columns:1fr 1fr}.bento-hero{grid-column:span 2}.two-col,.arch-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:repeat(2,1fr)}.stats{flex-wrap:wrap;gap:24px}}
+        @media(max-width:600px){.container{padding:0 16px}.hero{padding:100px 0 48px}.bento{grid-template-columns:1fr}.bento-hero{grid-column:span 1}.stats{gap:16px}.stat-div{display:none}.nav-links a:not(.nav-cta){display:none}.footer-grid{grid-template-columns:1fr}.pills{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
+
+        a:focus-visible{outline:2px solid var(--accent1);outline-offset:2px}
+    </style>
 </head>
 <body>
 
-<nav class="top">
-  <div class="inner">
-    <span class="name">topsail</span>
-    <div class="links">
-      <a href="#features">Features</a>
-      <a href="#applets">Applets</a>
-      <a href="#architecture">Architecture</a>
-      <a href="#download">Download</a>
-      <a href="https://github.com/Real-Fruit-Snacks/topsail">GitHub</a>
+    <!-- Nav -->
+    <nav class="nav"><div class="nav-inner">
+        <a href="#" class="nav-logo">topsail</a>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#applets">Applets</a>
+            <a href="#architecture">Architecture</a>
+            <a href="https://github.com/Real-Fruit-Snacks/topsail">GitHub</a>
+            <a href="https://github.com/Real-Fruit-Snacks/topsail/releases/latest" class="nav-cta">Download</a>
+        </div>
+    </div></nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-logo animate"><img src="assets/logo-dark.svg" alt="topsail"></div>
+            <h1 class="hero-tagline animate" style="transition-delay:.1s">Unix utilities, in one Go binary, anywhere.</h1>
+            <p class="hero-desc animate" style="transition-delay:.2s">A BusyBox-style multi-call binary in Go — 84 Unix utilities, one ~3 MB statically-linked executable, native on Linux, macOS, and Windows.</p>
+            <div class="hero-ctas animate" style="transition-delay:.3s">
+                <a href="https://github.com/Real-Fruit-Snacks/topsail/releases/latest" class="btn-primary">Download Latest</a>
+                <a href="https://github.com/Real-Fruit-Snacks/topsail" class="btn-secondary">View Source</a>
+            </div>
+            <div class="terminal animate-scale" style="transition-delay:.4s">
+                <div class="terminal-bar">
+                    <span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span>
+                    <span class="terminal-label">topsail</span>
+                </div>
+                <div class="terminal-body"><pre><span class="t-g">$</span> topsail seq 100 | topsail sort -rn | topsail head -3
+<span class="t-y">100
+99
+98</span>
+
+<span class="t-g">$</span> topsail find . -name '*.go' -size +1k -mtime -7
+<span class="t-m">./internal/cli/dispatch.go
+./applets/awk/awk.go
+./applets/sed/sed.go</span>
+
+<span class="t-g">$</span> topsail tar -czf src.tgz internal/ --exclude='*_test.go'
+<span class="t-g">$</span> topsail sha256sum src.tgz
+<span class="t-b">4f2a8b1c3e7d… *src.tgz</span></pre></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <div class="container">
+        <div class="stats animate">
+            <div class="stat"><div class="stat-num" data-target="84">0</div><div class="stat-label">Applets</div></div>
+            <div class="stat-div"></div>
+            <div class="stat"><div class="stat-num" data-target="710">0</div><div class="stat-label">Tests</div></div>
+            <div class="stat-div"></div>
+            <div class="stat"><div class="stat-num" data-target="3" data-suffix="MB">0</div><div class="stat-label">Binary</div></div>
+            <div class="stat-div"></div>
+            <div class="stat"><div class="stat-num" data-target="6">0</div><div class="stat-label">Targets</div></div>
+            <div class="stat-div"></div>
+            <div class="stat"><div class="stat-num" data-target="0" data-prefix="" data-suffix=" deps">0</div><div class="stat-label">Runtime</div></div>
+        </div>
+        <div class="gradient-line"></div>
     </div>
-  </div>
-</nav>
 
-<header class="hero">
-  <img class="logo" src="assets/logo-dark.svg" alt="topsail">
-  <p class="tag">A BusyBox-style multi-call binary in Go. 84 Unix utilities, one ~3 MB statically-linked executable, native on Linux, macOS, and Windows.</p>
-  <div class="cta">
-    <a class="btn primary" href="#download">Download</a>
-    <a class="btn secondary" href="https://github.com/Real-Fruit-Snacks/topsail">View on GitHub</a>
-  </div>
-</header>
+    <!-- Features Bento -->
+    <section id="features">
+        <div class="container">
+            <div class="section-label animate">FEATURES</div>
+            <h2 class="section-title animate" style="transition-delay:.08s">Everything you reach for, in one place</h2>
+            <p class="section-desc animate" style="transition-delay:.16s">A familiar POSIX surface. Real flag coverage, not stubs. One static binary that runs unchanged on glibc, musl/Alpine, distroless, and scratch.</p>
 
-<section>
-  <div class="grid-stats">
-    <div class="stat"><span class="num">84</span><span class="label">applet names</span></div>
-    <div class="stat"><span class="num">64</span><span class="label">Go packages</span></div>
-    <div class="stat"><span class="num">6</span><span class="label">platform binaries</span></div>
-    <div class="stat"><span class="num">~3 MB</span><span class="label">stripped binary</span></div>
-    <div class="stat"><span class="num">0</span><span class="label">runtime deps</span></div>
-  </div>
-</section>
+            <div class="bento">
+                <div class="bento-card bento-hero animate" style="transition-delay:.1s">
+                    <h3>One Static Binary, 84 Utilities</h3>
+                    <p>Every common shell tool dispatched through a single executable — POSIX coreutils plus <code>jq</code>, <code>curl</code>, <code>host</code>, <code>ping</code>, <code>tar</code>/<code>zip</code>/<code>gzip</code>, hashing, and the BusyBox parity gap-fillers. Symlink to any applet name and dispatch becomes transparent.</p>
+                    <div class="mini-terminal"><span class="t-g">$</span> topsail --list | wc -l<br><span class="t-b">84</span><br><span class="t-g">$</span> ln -s topsail ls && ./ls -la</div>
+                </div>
+                <div class="bento-card bento-stat animate" style="transition-delay:.18s">
+                    <div class="big">~3<span style="font-size:24px">MB</span></div>
+                    <div class="label">Static Binary</div>
+                </div>
+                <div class="bento-card animate" style="transition-delay:.2s">
+                    <h3 style="color:var(--mauve)">Fully Static</h3>
+                    <p><code>CGO_ENABLED=0 go build</code> — runs unchanged on glibc, musl/Alpine, distroless, and scratch. No interpreter, no shared libs, no surprises.</p>
+                </div>
+                <div class="bento-card animate" style="transition-delay:.28s">
+                    <h3 style="color:var(--green)">Real Applets</h3>
+                    <p><code>find</code> with <code>-exec</code>, <code>-prune</code>, parens, boolean ops. <code>sed</code> with addresses, ranges, multi-command scripts. <code>awk</code> via <a href="https://github.com/benhoyt/goawk">goawk</a>. <code>jq</code> via <a href="https://github.com/itchyny/gojq">gojq</a>. <code>sort -k FIELD -t SEP</code>. Symbolic <code>chmod</code> modes.</p>
+                </div>
+                <div class="bento-card animate" style="transition-delay:.36s">
+                    <h3 style="color:var(--peach)">Microsecond Startup</h3>
+                    <p>No interpreter cold-start. Pipelines that spawn 1000 instances feel native. <code>tail -f</code> follows files; <code>xargs</code> handles binary-safe paths via <code>-0</code>.</p>
+                </div>
+                <div class="bento-card bento-stat animate" style="transition-delay:.1s">
+                    <div class="big" style="color:var(--teal)">710</div>
+                    <div class="label">Unit Tests</div>
+                </div>
+                <div class="bento-card bento-hero animate" style="transition-delay:.18s">
+                    <h3 style="color:var(--red)">Cosign-Signed Releases</h3>
+                    <p>Each release ships a <code>checksums.txt.sigstore.json</code> Sigstore bundle (signature + certificate + Rekor inclusion proof) plus a syft-generated SBOM per archive. Keyless OIDC via GitHub Actions — no key management.</p>
+                    <div class="mini-terminal"><span class="t-g">$</span> cosign verify-blob \\<br>&nbsp;&nbsp;<span class="t-p">--bundle</span> checksums.txt.sigstore.json \\<br>&nbsp;&nbsp;<span class="t-p">--certificate-identity-regexp</span> '...' \\<br>&nbsp;&nbsp;checksums.txt</div>
+                </div>
+                <div class="bento-card animate" style="transition-delay:.26s">
+                    <h3 style="color:var(--yellow)">Hackable</h3>
+                    <p>One Go package per applet — most are 100–300 lines. Add a new one by dropping a module under <code>applets/</code> with <code>NAME</code>, <code>HELP</code>, <code>USAGE</code>, and <code>Main(argv)</code>.</p>
+                </div>
+                <div class="bento-card animate" style="transition-delay:.34s">
+                    <h3 style="color:var(--accent1)">Linux Packages</h3>
+                    <p>Each release ships <code>.deb</code>, <code>.rpm</code>, and <code>.apk</code> alongside the tarballs. Packages install the binary, man pages, and shell completions for bash / zsh / fish to their canonical paths.</p>
+                </div>
+                <div class="bento-card animate" style="transition-delay:.42s">
+                    <h3 style="color:var(--mauve)">Six Native Targets</h3>
+                    <p>Linux × x86_64 / ARM64, macOS × Intel / Apple Silicon, Windows × x86_64 / ARM64. Cross-compiled from a single CI job; no per-OS runners required.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<section id="features">
-  <h2>What you get</h2>
-  <div class="grid-features">
-    <div class="feature">
-      <h3>One static binary, anywhere</h3>
-      <p><code>CGO_ENABLED=0 go build</code> produces a single executable that runs unchanged on glibc, musl/Alpine, distroless, and scratch — no libc dance, no shared libs.</p>
-    </div>
-    <div class="feature">
-      <h3>Multi-call dispatch</h3>
-      <p>Symlink (or copy on Windows) <code>topsail</code> to any applet name and the binary picks it up via <code>argv[0]</code>. Unknown invocations fall through to <code>topsail &lt;applet&gt; …</code>.</p>
-    </div>
-    <div class="feature">
-      <h3>Microsecond startup</h3>
-      <p>No interpreter cold-start. Pipelines that spawn 1000 instances feel native; CI scripts run measurably faster than their Python equivalents.</p>
-    </div>
-    <div class="feature">
-      <h3>Six-platform release</h3>
-      <p>Linux × amd64/arm64, macOS × amd64/arm64, Windows × amd64/arm64. Cross-compiled from one CI job; checksums signed via cosign keyless OIDC.</p>
-    </div>
-    <div class="feature">
-      <h3>Hardened by default</h3>
-      <p>govulncheck on every push and weekly cron, CodeQL on top of <code>golangci-lint</code> v2 (errcheck, gocritic, gosec, govet, revive, staticcheck). Awk runs with <code>system()</code> disabled. Tar/zip refuse path traversal.</p>
-    </div>
-    <div class="feature">
-      <h3>SBOM + provenance</h3>
-      <p>Each release archive ships with a syft-generated SBOM and the checksum file is signed with cosign keyless OIDC. Verifiable end-to-end without managing keys.</p>
-    </div>
-  </div>
-</section>
+    <!-- Applets -->
+    <section id="applets" style="background:var(--mantle)">
+        <div class="container">
+            <div class="section-label animate">APPLETS</div>
+            <h2 class="section-title animate" style="transition-delay:.08s">All 84, organized</h2>
+            <p class="section-desc animate" style="transition-delay:.16s">Each applet implements common POSIX flags. Run <code>topsail &lt;applet&gt; --help</code> for per-applet usage.</p>
 
-<section>
-  <h2>Quick start</h2>
-  <h3>Pre-built binary (Linux / macOS)</h3>
-<pre><code>OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
-curl -fL -o topsail.tar.gz \
-  "https://github.com/Real-Fruit-Snacks/topsail/releases/latest/download/topsail_${OS}_${ARCH}.tar.gz"
-tar xzf topsail.tar.gz
-./topsail --list</code></pre>
+            <div class="pill-group animate" data-accent="green">
+                <div class="pill-group-label">File operations</div>
+                <div class="pills">
+                    <div class="pill">cat</div>
+                    <div class="pill">cp</div>
+                    <div class="pill">mv</div>
+                    <div class="pill">rm</div>
+                    <div class="pill">mkdir</div>
+                    <div class="pill">rmdir</div>
+                    <div class="pill">touch</div>
+                    <div class="pill">find</div>
+                    <div class="pill">chmod</div>
+                    <div class="pill">chown</div>
+                    <div class="pill">ln</div>
+                    <div class="pill">stat</div>
+                    <div class="pill">truncate</div>
+                    <div class="pill">unlink</div>
+                    <div class="pill">mktemp</div>
+                </div>
+            </div>
 
-  <h3>Linux packages</h3>
-<pre><code># Debian / Ubuntu
-sudo dpkg -i topsail_amd64.deb
+            <div class="pill-group animate" style="transition-delay:.06s" data-accent="peach">
+                <div class="pill-group-label">Text processing</div>
+                <div class="pills">
+                    <div class="pill">tac</div>
+                    <div class="pill">rev</div>
+                    <div class="pill">head</div>
+                    <div class="pill">tail</div>
+                    <div class="pill">wc</div>
+                    <div class="pill">nl</div>
+                    <div class="pill">sort</div>
+                    <div class="pill">uniq</div>
+                    <div class="pill">cut</div>
+                    <div class="pill">paste</div>
+                    <div class="pill">tr</div>
+                    <div class="pill">tee</div>
+                    <div class="pill">xargs</div>
+                    <div class="pill">printf</div>
+                    <div class="pill">echo</div>
+                    <div class="pill">expand</div>
+                    <div class="pill">unexpand</div>
+                    <div class="pill">split</div>
+                    <div class="pill">comm</div>
+                    <div class="pill">join</div>
+                    <div class="pill">fold</div>
+                    <div class="pill">column</div>
+                    <div class="pill">tsort</div>
+                    <div class="pill">factor</div>
+                    <div class="pill">shuf</div>
+                    <div class="pill">sum</div>
+                    <div class="pill">seq</div>
+                    <div class="pill">yes</div>
+                </div>
+            </div>
 
-# Fedora / RHEL / openSUSE
-sudo rpm -i topsail_amd64.rpm
+            <div class="pill-group animate" style="transition-delay:.09s" data-accent="red">
+                <div class="pill-group-label">Heavy text</div>
+                <div class="pills">
+                    <div class="pill">grep<span class="alias">egrep</span></div>
+                    <div class="pill">grep<span class="alias">fgrep</span></div>
+                    <div class="pill">sed</div>
+                    <div class="pill">awk<span class="alias">gawk</span></div>
+                    <div class="pill">awk<span class="alias">nawk</span></div>
+                </div>
+            </div>
 
-# Alpine
-sudo apk add --allow-untrusted topsail_amd64.apk</code></pre>
+            <div class="pill-group animate" style="transition-delay:.12s" data-accent="cyan">
+                <div class="pill-group-label">JSON &amp; data</div>
+                <div class="pills">
+                    <div class="pill">jq</div>
+                </div>
+            </div>
 
-  <h3>Build from source</h3>
-<pre><code>git clone https://github.com/Real-Fruit-Snacks/topsail
-cd topsail
-make build
-./topsail --list</code></pre>
+            <div class="pill-group animate" style="transition-delay:.15s" data-accent="mauve">
+                <div class="pill-group-label">Network</div>
+                <div class="pills">
+                    <div class="pill">curl<span class="alias">wget</span></div>
+                    <div class="pill">host<span class="alias">nslookup</span></div>
+                    <div class="pill">ping</div>
+                </div>
+            </div>
 
-  <h3>Multi-call dispatch</h3>
-<pre><code>topsail ls -la                    # explicit dispatch
-ln -s topsail ls && ./ls -la      # symlink dispatch (Unix)
-copy topsail.exe ls.exe & ls -la  # copy dispatch (Windows)</code></pre>
-</section>
+            <div class="pill-group animate" style="transition-delay:.18s" data-accent="teal">
+                <div class="pill-group-label">Hashing &amp; integrity</div>
+                <div class="pills">
+                    <div class="pill">md5sum</div>
+                    <div class="pill">sha256sum</div>
+                    <div class="pill">sha512sum</div>
+                </div>
+            </div>
 
-<section id="applets">
-  <h2>Supported applets</h2>
-  <p>84 registered names across 74 packages. Documented divergences from POSIX / mainsail are listed in the <a href="https://github.com/Real-Fruit-Snacks/topsail/blob/main/ARCHITECTURE.md#documented-divergences-from-mainsail">architecture doc</a>.</p>
-  <table class="applets">
-    <thead><tr><th>Category</th><th>Applets</th></tr></thead>
-    <tbody>
-      <tr>
-        <th>Foundation</th>
-        <td><code>cat</code> <code>echo</code> <code>true</code> <code>false</code> <code>yes</code> <code>printf</code> <code>pwd</code> <code>basename</code> <code>dirname</code> <code>mkdir</code> <code>rmdir</code> <code>touch</code> <code>mv</code> <code>cp</code> <code>rm</code></td>
-      </tr>
-      <tr>
-        <th>POSIX text</th>
-        <td><code>head</code> <code>tail</code> <code>wc</code> <code>tee</code> <code>tac</code> <code>rev</code> <code>tr</code> <code>cut</code> <code>sort</code> <code>uniq</code> <code>seq</code> <code>sleep</code> <code>expr</code> <code>test</code> <code>[</code> <code>expand</code> <code>unexpand</code></td>
-      </tr>
-      <tr>
-        <th>Heavy text / FS</th>
-        <td><code>grep</code> <code>egrep</code> <code>fgrep</code> <code>sed</code> <code>awk</code> <code>gawk</code> <code>nawk</code> <code>find</code> <code>ls</code> <code>stat</code> <code>file</code> <code>du</code> <code>df</code> <code>chmod</code> <code>chown</code> <code>which</code> <code>xargs</code> <code>date</code> <code>realpath</code> <code>truncate</code> <code>unlink</code> <code>mktemp</code></td>
-      </tr>
-      <tr>
-        <th>Archives &amp; hashing / encoding</th>
-        <td><code>tar</code> <code>gzip</code> <code>gunzip</code> <code>zip</code> <code>unzip</code> <code>sha256sum</code> <code>sha512sum</code> <code>md5sum</code> <code>base64</code> <code>xxd</code></td>
-      </tr>
-      <tr>
-        <th>Network &amp; JSON</th>
-        <td><code>curl</code> <code>wget</code> <code>jq</code> <code>host</code> <code>nslookup</code> <code>ping</code></td>
-      </tr>
-      <tr>
-        <th>Process &amp; system</th>
-        <td><code>time</code> <code>timeout</code> <code>nproc</code></td>
-      </tr>
-      <tr>
-        <th>Coreutils gap-fillers</th>
-        <td><code>env</code> <code>whoami</code> <code>id</code> <code>hostname</code> <code>uname</code> <code>ln</code> <code>readlink</code> <code>nl</code> <code>paste</code> <code>fold</code> <code>split</code> <code>factor</code> <code>shuf</code> <code>comm</code> <code>join</code> <code>sum</code> <code>column</code> <code>tsort</code></td>
-      </tr>
-    </tbody>
-  </table>
-</section>
+            <div class="pill-group animate" style="transition-delay:.21s" data-accent="yellow">
+                <div class="pill-group-label">Archives</div>
+                <div class="pills">
+                    <div class="pill">tar</div>
+                    <div class="pill">gzip</div>
+                    <div class="pill">gunzip</div>
+                    <div class="pill">zip</div>
+                    <div class="pill">unzip</div>
+                </div>
+            </div>
 
-<section id="architecture">
-  <h2>Architecture</h2>
-  <p>Four moving parts. The binary's entry point imports applet packages for side effects; each applet self-registers in <code>init()</code>; <code>cli.Run</code> resolves <code>argv[0]</code>'s basename against the registry and dispatches.</p>
-  <div class="arch-flow">
-<pre><code>cmd/topsail/main.go        process entry; imports applet packages, calls cli.Run
-   │
-   ▼
-internal/cli                argv[0] basename match; multi-call vs wrapper mode
-   │
-   ▼
-internal/applet             registry: Register, Get, All; thread-safe; panics on dup
-   │
-   ▼
-applets/&lt;name&gt;/             one package per applet; init() registers; Main is the entry</code></pre>
-  </div>
-  <p>Full detail in <a href="https://github.com/Real-Fruit-Snacks/topsail/blob/main/ARCHITECTURE.md"><code>ARCHITECTURE.md</code></a>: applet contract, registry semantics, dispatch flow, per-OS shims, build identification, and the divergence list.</p>
-</section>
+            <div class="pill-group animate" style="transition-delay:.24s" data-accent="blue">
+                <div class="pill-group-label">Encoding</div>
+                <div class="pills">
+                    <div class="pill">base64</div>
+                    <div class="pill">xxd</div>
+                </div>
+            </div>
 
-<section id="download">
-  <h2>Download</h2>
-  <p>Each release ships six platform/architecture archives, plus a <code>checksums.txt</code> file with cosign keyless OIDC signatures and SBOMs.</p>
-  <p><a class="btn primary" href="https://github.com/Real-Fruit-Snacks/topsail/releases/latest">Latest release on GitHub</a></p>
-  <h3>Verify a release</h3>
-<pre><code>cosign verify-blob \
-  --bundle checksums.txt.sigstore.json \
-  --certificate-identity-regexp 'https://github.com/Real-Fruit-Snacks/topsail/.*' \
-  --certificate-oidc-issuer    https://token.actions.githubusercontent.com \
-  checksums.txt
-sha256sum -c checksums.txt --ignore-missing</code></pre>
-</section>
+            <div class="pill-group animate" style="transition-delay:.27s" data-accent="lavender">
+                <div class="pill-group-label">Filesystem &amp; paths</div>
+                <div class="pills">
+                    <div class="pill">ls</div>
+                    <div class="pill">du</div>
+                    <div class="pill">df</div>
+                    <div class="pill">file</div>
+                    <div class="pill">basename</div>
+                    <div class="pill">dirname</div>
+                    <div class="pill">realpath</div>
+                    <div class="pill">readlink</div>
+                    <div class="pill">pwd</div>
+                    <div class="pill">which</div>
+                </div>
+            </div>
 
-<footer>
-  <p>
-    <a href="https://github.com/Real-Fruit-Snacks/topsail">GitHub</a> ·
-    <a href="https://github.com/Real-Fruit-Snacks/topsail/releases">Releases</a> ·
-    <a href="https://github.com/Real-Fruit-Snacks/topsail/blob/main/ARCHITECTURE.md">Architecture</a> ·
-    <a href="https://github.com/Real-Fruit-Snacks/topsail/blob/main/CONTRIBUTING.md">Contributing</a> ·
-    <a href="https://github.com/Real-Fruit-Snacks/topsail/blob/main/SECURITY.md">Security</a>
-  </p>
-  <p>Sibling project: <a href="https://github.com/Real-Fruit-Snacks/mainsail">mainsail</a> (Python, same applet contract). Released under the <a href="https://github.com/Real-Fruit-Snacks/topsail/blob/main/LICENSE">MIT license</a>.</p>
-</footer>
+            <div class="pill-group animate" style="transition-delay:.30s" data-accent="pink">
+                <div class="pill-group-label">System &amp; process</div>
+                <div class="pills">
+                    <div class="pill">uname</div>
+                    <div class="pill">hostname</div>
+                    <div class="pill">whoami</div>
+                    <div class="pill">id</div>
+                    <div class="pill">date</div>
+                    <div class="pill">env</div>
+                    <div class="pill">sleep</div>
+                    <div class="pill">expr</div>
+                    <div class="pill">test<span class="alias">[</span></div>
+                    <div class="pill">true</div>
+                    <div class="pill">false</div>
+                    <div class="pill">nproc</div>
+                    <div class="pill">time</div>
+                    <div class="pill">timeout</div>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <!-- Architecture -->
+    <section id="architecture">
+        <div class="container">
+            <div class="section-label animate">ARCHITECTURE</div>
+            <h2 class="section-title animate" style="transition-delay:.08s">Four-layer dispatch</h2>
+            <p class="section-desc animate" style="transition-delay:.16s">Clean separation between the entry point, dispatch logic, applet registry, and per-applet implementations. Adding an applet means dropping one Go package plus one blank import.</p>
+            <div class="arch-grid">
+                <div class="arch-card animate" style="transition-delay:.1s">
+                    <div class="arch-num">1</div>
+                    <h3>Entry</h3>
+                    <p><code>cmd/topsail/main.go</code> imports <code>internal/applets</code> for side-effect registration, then calls <code>cli.Run(os.Args)</code>. Same entry path whether the binary is invoked directly, via <code>topsail &lt;applet&gt;</code>, or through a symlink.</p>
+                </div>
+                <div class="arch-card animate" style="transition-delay:.2s">
+                    <div class="arch-num">2</div>
+                    <h3>Dispatch</h3>
+                    <p><code>internal/cli</code> matches <code>argv[0]</code>'s basename against the registry (multi-call mode); <code>.exe</code> suffix is stripped on Windows. Unknown invocations fall through to <code>topsail &lt;applet&gt; [args]</code> wrapper mode. <code>--help</code> only — <code>-h</code> stays free for applets like <code>df -h</code>.</p>
+                </div>
+                <div class="arch-card animate" style="transition-delay:.3s">
+                    <div class="arch-num">3</div>
+                    <h3>Registry</h3>
+                    <p><code>internal/applet</code> exposes <code>Register</code>, <code>Get</code>, and <code>All</code>, guarded by a <code>sync.RWMutex</code>. Duplicate names or alias collisions panic at startup — every conflict surfaces immediately, never at runtime in production.</p>
+                </div>
+                <div class="arch-card animate" style="transition-delay:.4s">
+                    <div class="arch-num">4</div>
+                    <h3>Applets</h3>
+                    <p>74 packages under <code>applets/</code>, each implementing the four-symbol contract: <code>Name</code>, <code>Aliases</code>, <code>Help</code>, <code>Usage</code>, <code>Main(argv) -> int</code>. Stdio reads/writes go through <code>internal/ioutil</code> package-level vars so tests swap in <code>bytes.Buffer</code>s directly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Getting Started -->
+    <section style="background:var(--mantle)">
+        <div class="container">
+            <div class="section-label animate">GETTING STARTED</div>
+            <h2 class="section-title animate" style="transition-delay:.08s">Install or build</h2>
+            <p class="section-desc animate" style="transition-delay:.16s">Pre-built binaries on the releases page, plus distro packages. Build from source for the full hackable experience.</p>
+            <div class="two-col">
+                <div class="terminal animate" style="transition-delay:.1s">
+                    <div class="terminal-bar"><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-label">install.sh</span></div>
+                    <div class="terminal-body"><pre><span class="t-m"># Linux / macOS — pre-built tarball</span>
+<span class="t-g">$</span> OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+<span class="t-g">$</span> ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+<span class="t-g">$</span> curl -fL -o topsail.tar.gz \\
+&nbsp;&nbsp;&nbsp;&nbsp;"https://github.com/Real-Fruit-Snacks/topsail/\\
+&nbsp;&nbsp;&nbsp;&nbsp;releases/latest/download/topsail_${OS}_${ARCH}.tar.gz"
+<span class="t-g">$</span> tar xzf topsail.tar.gz && ./topsail --version
+
+<span class="t-m"># Linux distro packages (.deb / .rpm / .apk)</span>
+<span class="t-g">$</span> sudo dpkg -i topsail_amd64.deb         <span class="t-m"># Debian/Ubuntu</span>
+<span class="t-g">$</span> sudo rpm -i  topsail_amd64.rpm         <span class="t-m"># Fedora/RHEL</span>
+<span class="t-g">$</span> sudo apk add --allow-untrusted topsail_amd64.apk  <span class="t-m"># Alpine</span>
+
+<span class="t-m"># Or build from source — Go 1.25+</span>
+<span class="t-g">$</span> git clone https://github.com/Real-Fruit-Snacks/topsail
+<span class="t-g">$</span> cd topsail && make build
+<span class="t-b">→ ./topsail (~3 MB, fully static)</span>
+
+<span class="t-m"># Or via go install</span>
+<span class="t-g">$</span> go install github.com/Real-Fruit-Snacks/topsail/cmd/topsail@latest</pre></div>
+                </div>
+                <div class="terminal animate" style="transition-delay:.25s">
+                    <div class="terminal-bar"><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-label">usage.sh</span></div>
+                    <div class="terminal-body"><pre><span class="t-m"># Daily pipelines (find + awk + jq, all in one binary)</span>
+<span class="t-g">$</span> topsail find . -name '*.go' -mtime -7
+<span class="t-g">$</span> topsail awk -F, '{s+=$3} END{print s/NR}' data.csv
+
+<span class="t-m"># Real jq via gojq</span>
+<span class="t-g">$</span> topsail jq '.servers[] | select(.region == "us") | .name' inv.json
+
+<span class="t-m"># Sort by field with custom separator</span>
+<span class="t-g">$</span> topsail sort -t : -k 3 -n /etc/passwd
+
+<span class="t-m"># Symlink for transparent dispatch</span>
+<span class="t-g">$</span> ln -s topsail ls && ./ls -la
+
+<span class="t-m"># Verify a release with cosign v3 bundle</span>
+<span class="t-g">$</span> cosign verify-blob \\
+&nbsp;&nbsp;&nbsp;&nbsp;--bundle checksums.txt.sigstore.json \\
+&nbsp;&nbsp;&nbsp;&nbsp;--certificate-identity-regexp '...' \\
+&nbsp;&nbsp;&nbsp;&nbsp;--certificate-oidc-issuer https://token.actions.githubusercontent.com \\
+&nbsp;&nbsp;&nbsp;&nbsp;checksums.txt
+<span class="t-b">Verified OK</span></pre></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-line"></div>
+            <div class="footer-grid">
+                <div>
+                    <h4>Documentation</h4>
+                    <ul>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/topsail#quick-start">Quick Start</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/topsail#features">Features</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/topsail#supported-applets">Applets</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/topsail/blob/main/ARCHITECTURE.md">Architecture</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/topsail/releases/latest">Latest Release</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/topsail/issues">Report Issue</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/topsail/blob/main/CONTRIBUTING.md">Contributing</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/topsail/actions">CI Status</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Toolkit</h4>
+                    <ul>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/mainsail">mainsail</a> <span style="color:var(--ov0);font-size:11px">(Python sibling)</span></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/Flux">Flux</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/Aquifer">Aquifer</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks">View All →</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>License</h4>
+                    <p>MIT License<br>Copyright © 2026<br>Real-Fruit-Snacks</p>
+                </div>
+            </div>
+            <div class="footer-bottom">Part of the Real-Fruit-Snacks water-themed toolkit · Go sibling of <a href="https://github.com/Real-Fruit-Snacks/mainsail" style="color:var(--accent1)">mainsail</a></div>
+        </div>
+    </footer>
+
+    <script>
+    // Scroll animations
+    const obs=new IntersectionObserver(e=>{e.forEach(el=>{if(el.isIntersecting){el.target.classList.add('visible');obs.unobserve(el.target)}})},{threshold:.1,rootMargin:'0px 0px -50px 0px'});
+    document.querySelectorAll('.animate,.animate-scale').forEach(el=>obs.observe(el));
+
+    // Counter animation
+    function countUp(el){const t=parseInt(el.dataset.target),s=el.dataset.suffix||'',p=el.dataset.prefix||'',d=1500,st=performance.now();function u(n){const pr=Math.min((n-st)/d,1),e=1-Math.pow(1-pr,3);el.textContent=p+Math.floor(t*e)+s;if(pr<1)requestAnimationFrame(u)}requestAnimationFrame(u)}
+    const sobs=new IntersectionObserver(e=>{e.forEach(el=>{if(el.isIntersecting){countUp(el.target);sobs.unobserve(el.target)}})},{threshold:.5});
+    document.querySelectorAll('.stat-num').forEach(el=>sobs.observe(el));
+
+    // Nav scroll
+    window.addEventListener('scroll',()=>{document.querySelector('.nav').style.borderBottomColor=window.scrollY>20?'rgba(49,50,68,0.8)':'rgba(49,50,68,0.3)'});
+    </script>
 </body>
 </html>

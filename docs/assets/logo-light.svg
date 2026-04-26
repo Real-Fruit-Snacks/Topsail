@@ -6,15 +6,15 @@
   <!-- Mast and sails -->
   <g transform="translate(28 22)">
     <!-- Mast -->
-    <line x1="24" y1="0" x2="24" y2="132" stroke="#00ADD8" stroke-width="3.2" stroke-linecap="round"/>
+    <line x1="24" y1="0" x2="24" y2="132" stroke="#0091B3" stroke-width="3.2" stroke-linecap="round"/>
     <!-- Yard (topsail spar) -->
-    <line x1="6" y1="6" x2="42" y2="6" stroke="#00ADD8" stroke-width="2.8" stroke-linecap="round"/>
+    <line x1="6" y1="6" x2="42" y2="6" stroke="#0091B3" stroke-width="2.8" stroke-linecap="round"/>
     <!-- Topsail (highlighted; this is the named sail) -->
-    <path d="M 26 8 L 26 58 L 104 36 Z" fill="#00ADD8"/>
+    <path d="M 26 8 L 26 58 L 104 36 Z" fill="#0091B3"/>
     <!-- Mainsail (muted to keep visual emphasis on the topsail) -->
-    <path d="M 26 66 L 26 130 L 124 106 Z" fill="#00ADD8" fill-opacity="0.32"/>
+    <path d="M 26 66 L 26 130 L 124 106 Z" fill="#0091B3" fill-opacity="0.32"/>
     <!-- Waterline -->
-    <path d="M -4 138 Q 70 144 144 138" stroke="#00ADD8" stroke-width="1.6" fill="none" stroke-opacity="0.6"/>
+    <path d="M -4 138 Q 70 144 144 138" stroke="#0091B3" stroke-width="1.6" fill="none" stroke-opacity="0.6"/>
   </g>
 
   <!-- Wordmark -->
@@ -23,10 +23,10 @@
           font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace"
           font-size="68"
           font-weight="700"
-          fill="#F8FAFC">topsail</text>
+          fill="#1F2937">topsail</text>
     <text x="3" y="128"
           font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
           font-size="18"
-          fill="#94A3B8">84 Unix utilities · one static Go binary · everywhere</text>
+          fill="#6B7280">84 Unix utilities · one static Go binary · everywhere</text>
   </g>
 </svg>
