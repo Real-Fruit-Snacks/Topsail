@@ -55,7 +55,10 @@ jobs:
         run: go vet ./...
       - uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.1.6
+          # latest: the action resolves to the most recent stable release.
+          # We need a binary built with Go >=1.25 since our go directive
+          # is 1.25.0; v2.1.6 was built with 1.24 and refuses to load.
+          version: latest
           args: --timeout=5m
 
   test:
