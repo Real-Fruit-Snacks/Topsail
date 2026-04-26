@@ -33,6 +33,13 @@ jobs:
 
       - name: Install cosign
         uses: sigstore/cosign-installer@v4.1.1
+        with:
+          # Pin cosign to the v2 line: goreleaser's sign args use the
+          # classic --output-signature / --output-certificate CLI, which
+          # cosign v4+ deprecated in favor of a bundle file. Bumping
+          # cosign requires migrating goreleaser's signs config and the
+          # README verify snippet in lockstep.
+          cosign-release: 'v2.4.1'
 
       - name: Run goreleaser
         uses: goreleaser/goreleaser-action@v7
