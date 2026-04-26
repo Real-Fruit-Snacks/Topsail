@@ -13,6 +13,7 @@ import (
 	// Applet imports — one line per applet package, alphabetized.
 	// Each blank import runs that package's init() to self-register.
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/awk"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/base64"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/basename"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/cat"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/chmod"
@@ -29,8 +30,10 @@ import (
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/file"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/find"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/grep"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/gzip"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/head"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/ls"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/md5sum"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/mkdir"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/mv"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/printf"
@@ -40,11 +43,14 @@ import (
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/rmdir"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/sed"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/seq"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/sha256sum"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/sha512sum"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/sleep"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/sort"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/stat"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/tac"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/tail"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/tar"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/tee"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/test"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/touch"
@@ -55,6 +61,7 @@ import (
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/which"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/xargs"
 	_ "github.com/Real-Fruit-Snacks/topsail/applets/yes"
+	_ "github.com/Real-Fruit-Snacks/topsail/applets/zip"
 )
 
 func main() {
