@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Real-Fruit-Snacks/topsail/main/docs/assets/logo-dark.svg" alt="topsail" width="620">
+</p>
+
 # topsail
 
 [![Go Version](https://img.shields.io/badge/go-1.25%2B-00ADD8.svg)](https://go.dev)
