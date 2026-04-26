@@ -94,12 +94,17 @@ func TestMkdirParentsExistsMidway(t *testing.T) {
 	}
 }
 
-// TestParseModeDirect covers parseMode's success and failure paths directly.
-func TestParseModeDirect(t *testing.T) {
-	if m, err := parseMode("0644"); err != nil || m != 0o644 {
-		t.Errorf("parseMode(0644) = %o, %v", m, err)
+// TestMkdirSymbolicMode exercises POSIX-style symbolic --mode arguments,
+// which are evaluated against an implied 0o777 base so "u-x" yields 0o677.
+func TestMkdirSymbolicMode(t *testing.T) {
+	root := t.TempDir()
+	target := filepath.Join(root, "sym")
+	testutil.CaptureStdio(t)
+	if rc := Main([]string{"mkdir", "-m", "u-x", target}); rc != 0 {
+		t.Errorf("rc = %d", rc)
 	}
-	if _, err := parseMode("9z"); err == nil {
-		t.Error("parseMode(\"9z\") expected error")
+	if _, err := os.Stat(target); err != nil {
+		t.Errorf("target not created: %v", err)
 	}
+	// On Windows file modes are mostly cosmetic, so don't assert bits.
 }

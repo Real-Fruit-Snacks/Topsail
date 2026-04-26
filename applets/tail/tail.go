@@ -1,17 +1,21 @@
 // Package tail implements the `tail` applet: output the last part of files.
 //
-// The follow mode (-f) is intentionally deferred to a later wave; this build
-// supports the static read-all-then-print-tail flavor that covers the
-// overwhelming majority of pipeline use cases.
+// The follow mode (-f) polls each file's size on a short interval and
+// emits any newly-appended bytes. Truncation (size shrinks) is handled
+// by re-seeking to the start of the file. stdin and pipes cannot be
+// followed — they are skipped with a diagnostic.
 package tail
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Real-Fruit-Snacks/topsail/internal/applet"
 	"github.com/Real-Fruit-Snacks/topsail/internal/ioutil"
@@ -36,16 +40,26 @@ Options:
   -c N, --bytes=N    print the last N bytes
   -q, --quiet        never print headers
   -v, --verbose      always print headers
-
-The follow option (-f) is not implemented in this build.
+  -f, --follow       output appended data as the file grows; exits on SIGINT
+  -s SECONDS, --sleep-interval=SECONDS
+                     time to wait between iterations of the follow loop (default 1)
 `
+
+// Test seams: tests override these to drive follow mode deterministically
+// without waiting for real wall-clock seconds or real signals.
+var (
+	followInterval = 1 * time.Second
+	newFollowCtx   = func() (context.Context, context.CancelFunc) {
+		return signal.NotifyContext(context.Background(), os.Interrupt)
+	}
+)
 
 // Main is the applet entry point.
 func Main(argv []string) int {
 	args := argv[1:]
 	nLines := 10
 	nBytes := 0
-	var byBytes, fromStart, quiet, verbose bool
+	var byBytes, fromStart, quiet, verbose, follow bool
 
 	parseN := func(s string) (n int, fs, ok bool) {
 		if strings.HasPrefix(s, "+") {
@@ -123,8 +137,28 @@ func Main(argv []string) int {
 			verbose = true
 			args = args[1:]
 		case a == "-f", a == "--follow":
-			ioutil.Errf("tail: -f is not implemented in this build")
-			return 2
+			follow = true
+			args = args[1:]
+		case a == "-s":
+			if len(args) < 2 {
+				ioutil.Errf("tail: option requires an argument -- 's'")
+				return 2
+			}
+			d, err := parseSleep(args[1])
+			if err != nil {
+				ioutil.Errf("tail: invalid sleep interval: %s", args[1])
+				return 2
+			}
+			followInterval = d
+			args = args[2:]
+		case strings.HasPrefix(a, "--sleep-interval="):
+			d, err := parseSleep(a[len("--sleep-interval="):])
+			if err != nil {
+				ioutil.Errf("tail: invalid sleep interval: %s", a)
+				return 2
+			}
+			followInterval = d
+			args = args[1:]
 		case strings.HasPrefix(a, "-") && len(a) > 1 && a != "-":
 			// Allow -<digits> shorthand: -5 == -n 5
 			if n, err := strconv.Atoi(a[1:]); err == nil && n >= 0 {
@@ -159,6 +193,26 @@ func Main(argv []string) int {
 			rc = 1
 		}
 	}
+
+	if follow {
+		realFiles := make([]string, 0, len(files))
+		for _, f := range files {
+			if f == "-" {
+				ioutil.Errf("tail: warning: --follow is ineffective on standard input")
+				continue
+			}
+			realFiles = append(realFiles, f)
+		}
+		if len(realFiles) > 0 {
+			ctx, cancel := newFollowCtx()
+			defer cancel()
+			if err := followFiles(ctx, realFiles, len(realFiles) > 1 || verbose); err != nil {
+				ioutil.Errf("tail: %v", err)
+				rc = 1
+			}
+		}
+	}
+
 	return rc
 }
 
@@ -235,9 +289,119 @@ func tailOne(name string, nLines, nBytes int, byBytes, fromStart bool) error {
 	return nil
 }
 
+// followed tracks one file across the follow loop's iterations: open
+// handle, last observed size for truncation detection, and the canonical
+// name we report in headers.
+type followed struct {
+	name string
+	f    *os.File
+	size int64
+}
+
+// followFiles opens each name, seeks to end, and polls every
+// followInterval for new bytes. It returns when ctx is canceled or an
+// unrecoverable I/O error occurs.
+func followFiles(ctx context.Context, names []string, showHeaders bool) error {
+	fs := make([]*followed, 0, len(names))
+	defer func() {
+		for _, fl := range fs {
+			_ = fl.f.Close()
+		}
+	}()
+	for _, name := range names {
+		f, err := os.Open(name) //nolint:gosec // user-supplied path
+		if err != nil {
+			ioutil.Errf("tail: cannot follow %s: %v", name, err)
+			continue
+		}
+		st, err := f.Stat()
+		if err != nil {
+			_ = f.Close()
+			ioutil.Errf("tail: cannot stat %s: %v", name, err)
+			continue
+		}
+		if _, err := f.Seek(0, io.SeekEnd); err != nil {
+			_ = f.Close()
+			return err
+		}
+		fs = append(fs, &followed{name: name, f: f, size: st.Size()})
+	}
+	if len(fs) == 0 {
+		return nil
+	}
+
+	var last string
+	buf := make([]byte, 4096)
+	for {
+		if err := ctx.Err(); err != nil {
+			return nil
+		}
+		progress := false
+		for _, fl := range fs {
+			st, err := os.Stat(fl.name)
+			if err != nil {
+				// File temporarily disappeared (rotate, rename) — skip
+				// this round; we'll catch the new one if it returns.
+				continue
+			}
+			if st.Size() < fl.size {
+				if _, err := fl.f.Seek(0, io.SeekStart); err != nil {
+					return err
+				}
+				fl.size = 0
+				ioutil.Errf("tail: %s: file truncated", fl.name)
+			}
+			for {
+				n, err := fl.f.Read(buf)
+				if n > 0 {
+					if showHeaders && fl.name != last {
+						if last != "" {
+							_, _ = fmt.Fprintln(ioutil.Stdout)
+						}
+						_, _ = fmt.Fprintf(ioutil.Stdout, "==> %s <==\n", fl.name)
+						last = fl.name
+					}
+					_, _ = ioutil.Stdout.Write(buf[:n])
+					fl.size += int64(n)
+					progress = true
+				}
+				if err == io.EOF || n == 0 {
+					break
+				}
+				if err != nil {
+					return err
+				}
+			}
+		}
+		if !progress {
+			select {
+			case <-ctx.Done():
+				return nil
+			case <-time.After(followInterval):
+			}
+		}
+	}
+}
+
 func labelFor(name string) string {
 	if name == "-" {
 		return "standard input"
 	}
 	return name
+}
+
+// parseSleep accepts a bare number (seconds) or a Go duration string.
+// "1" -> 1s; "500ms" -> 500ms; "2.5" -> 2.5s.
+func parseSleep(s string) (time.Duration, error) {
+	if f, err := strconv.ParseFloat(s, 64); err == nil && f >= 0 {
+		return time.Duration(f * float64(time.Second)), nil
+	}
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		return 0, err
+	}
+	if d < 0 {
+		return 0, fmt.Errorf("negative interval")
+	}
+	return d, nil
 }

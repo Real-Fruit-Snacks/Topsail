@@ -169,10 +169,13 @@ func inSet(r rune, set []rune) bool {
 func expandSet(s string) ([]rune, error) {
 	var out []rune
 	for i := 0; i < len(s); {
-		// Character class: [:alpha:] etc.
+		// Character class: [:alpha:] etc. The ":]" closer must come at
+		// least two bytes past the opening "[:" so the slice for the
+		// class name is non-degenerate; "[:]" and "[::]" don't name a
+		// real class and fall through to the literal-char path.
 		if i+1 < len(s) && s[i] == '[' && s[i+1] == ':' {
 			end := strings.Index(s[i:], ":]")
-			if end > 0 {
+			if end >= 3 {
 				name := s[i+2 : i+end]
 				if cls := classRunes(name); cls != nil {
 					out = append(out, cls...)

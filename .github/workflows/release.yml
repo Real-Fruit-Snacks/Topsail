@@ -34,17 +34,16 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@v4.1.1
         with:
-          # Pin cosign to the v2 line: goreleaser's sign args use the
-          # classic --output-signature / --output-certificate CLI, which
-          # cosign v4+ deprecated in favor of a bundle file. Bumping
-          # cosign requires migrating goreleaser's signs config and the
-          # README verify snippet in lockstep.
-          cosign-release: 'v2.4.1'
+          # cosign v3 dropped the legacy --output-certificate /
+          # --output-signature flags; .goreleaser.yaml writes the
+          # Sigstore bundle (.sigstore.json) instead. README and
+          # docs/index.html verify snippets must use --bundle to match.
+          cosign-release: 'v3.0.6'
 
       - name: Run goreleaser
         uses: goreleaser/goreleaser-action@v7
         with:
-          version: v2.4.4
+          version: v2.15.4
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

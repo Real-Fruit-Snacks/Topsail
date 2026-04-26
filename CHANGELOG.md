@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-04-26
+
+### Added
+
+- **10 new applets**, raising the registered count from 74 to 84:
+  - **`tail -f`** follow mode — poll-based, honors SIGINT, handles file truncation, supports multi-file with headers. `--sleep-interval=N` controls the poll cadence.
+  - **`sed`** beyond `s/.../.../`: addresses (`N`, `$`, `/re/`), ranges (`addr1,addr2`), negation (`addr!cmd`), multi-command scripts via `;` / newline, `-e EXPR` (combinable), and the `d` (delete), `p` (print), `q` (quit) commands.
+  - **`sort -k FIELD[,FIELD][OPTS]`** and **`-t SEP`** — repeatable keys with per-key option suffixes (`-k 2nr`); honored across all comparators including `-u` uniq.
+  - **Symbolic file modes** for `chmod` (`u+x`, `go-w`, `a=rwx,u+s`, `g=u`, `+X`) and `mkdir -m` — POSIX-spec evaluation against each file's current mode (`chmod`) or against an implied 0o777 base (`mkdir`). Octal and symbolic share the new `internal/filemode.Parse`.
+  - **`nproc`** — print the number of processing units; `--all`, `--ignore=N`.
+  - **`mktemp`** — secure temp file/dir; `-d`, `-p DIR`, `-t`, `--suffix=`, `--tmpdir=`, `-u` (dry run), `-q`.
+  - **`realpath`** — resolve absolute path; `-e` / `-m` / `-s` / `-q` / `-z`.
+  - **`truncate -s SIZE`** — shrink/extend; supports `+`/`-`/`<`/`>` modifiers, K/M/G/T (1024) and KB/MB/GB/TB (1000) suffixes; auto-creates files unless `-c`.
+  - **`unlink`** — strict single-file remove (POSIX `unlink(2)` semantics; refuses directories).
+  - **`xxd`** — canonical and plain hex dump, plus `-r` revert; `-c COLS`, `-g GROUP`, `-u` uppercase. Round-trips its own canonical output.
+  - **`expand`** / **`unexpand`** — tab/space conversion; `-t N` or `-t LIST` for explicit stops; `unexpand -a` compresses non-leading runs too.
+  - **`timeout DURATION COMMAND`** — context-cancellation-based wall-clock kill. `-k`, `-s`, `--preserve-status`. Coreutils exit codes (124/125/126/127).
+  - **`time COMMAND`** — wall-clock timing with user/sys CPU when the OS reports them (Unix); zeros on Windows. Output mirrors GNU `time`'s `0m1.234s` shape.
+
+### Changed
+
+- **`internal/cli` exit codes**: `time` and `timeout` use coreutils-style codes (124 / 125 / 126 / 127); existing applets unaffected.
+- README and Pages applet tables list the new entries; introductory line now reads "84 Unix utilities".
+
+### Fixed
+
+- **`tr [:]` panic**: `expandSet` sliced `s[2:1]` for a degenerate POSIX class shape. Found by the new `FuzzExpandSet` target; fix tightened the `:]` closer offset check.
+
+### Security / supply chain
+
+- **cosign migration to the Sigstore bundle format**. `.goreleaser.yaml` now writes one `checksums.txt.sigstore.json` (signature + certificate + Rekor inclusion proof in one file) instead of the legacy `.sig` + `.pem` pair. `cosign` was bumped to `v3.0.6`; the legacy `--output-certificate` / `--output-signature` flags were removed in cosign v3.0.0.
+- README and Pages verify snippets updated to match: `cosign verify-blob --bundle checksums.txt.sigstore.json …`
+- **goreleaser** bumped from `v2.4.4` to `v2.15.4`.
+
+### Tests
+
+- **Fuzz targets**: `FuzzEmit` and `FuzzDecodeEscape` (printf), `FuzzExprParse`, `FuzzExpandSet` (tr), `FuzzParseScript` (sed), `FuzzParse` (filemode). `make fuzz` runs them all for 30s each in CI; the `tr` target found a real crash before this release.
+- **Integration test harness** at `tests/integration/`: builds the binary in `TestMain`, runs it as a subprocess to verify `--list`, `--version`, multi-call dispatch, symlink/copy dispatch, and cross-applet pipelines.
+
 ## [1.1.0] - 2026-04-26
 
 ### Added
@@ -80,5 +119,6 @@ Captured in detail in [`ARCHITECTURE.md`](ARCHITECTURE.md#documented-divergences
 - `basename` / `dirname` use the OS-agnostic `path` package, treating `/` as the separator on every platform.
 - `tail -f` follow mode and symbolic file modes (`u+rwx`) are queued for follow-up.
 
+[1.2.0]: https://github.com/Real-Fruit-Snacks/topsail/releases/tag/v1.2.0
 [1.1.0]: https://github.com/Real-Fruit-Snacks/topsail/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Real-Fruit-Snacks/topsail/releases/tag/v1.0.0

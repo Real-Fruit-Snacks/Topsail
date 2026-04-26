@@ -13,7 +13,7 @@
 [![govulncheck](https://github.com/Real-Fruit-Snacks/topsail/actions/workflows/govulncheck.yml/badge.svg)](https://github.com/Real-Fruit-Snacks/topsail/actions/workflows/govulncheck.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/Real-Fruit-Snacks/topsail.svg)](https://pkg.go.dev/github.com/Real-Fruit-Snacks/topsail)
 
-**A BusyBox-style multi-call binary in Go — 74 Unix utilities, one ~3 MB statically-linked executable, native on Linux, macOS, and Windows.**
+**A BusyBox-style multi-call binary in Go — 84 Unix utilities, one ~3 MB statically-linked executable, native on Linux, macOS, and Windows.**
 
 `topsail` is the Go sibling of [mainsail](https://github.com/Real-Fruit-Snacks/mainsail). Same applet contract, same dispatch UX, same `--list` / `--help` formatting — but compiled to a single static binary that runs unchanged on glibc, musl/Alpine, distroless, and scratch.
 
@@ -95,12 +95,11 @@ Linux binaries are built with `CGO_ENABLED=0` and are fully static — they run 
 
 ### Verifying signatures
 
-Each release includes a `checksums.txt`, a cosign signature (`checksums.txt.sig`), and a certificate (`checksums.txt.pem`). Verify with cosign:
+Each release includes a `checksums.txt` plus a cosign Sigstore bundle (`checksums.txt.sigstore.json`) that combines the signature, certificate, and Rekor inclusion proof. Verify with cosign v3+:
 
 ```bash
 cosign verify-blob \
-  --certificate checksums.txt.pem \
-  --signature   checksums.txt.sig \
+  --bundle checksums.txt.sigstore.json \
   --certificate-identity-regexp 'https://github.com/Real-Fruit-Snacks/topsail/.*' \
   --certificate-oidc-issuer    https://token.actions.githubusercontent.com \
   checksums.txt
@@ -128,13 +127,14 @@ sha256sum -c checksums.txt --ignore-missing
 | Category               | Applets                                                                                                                   |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | **Foundation**         | `cat` `echo` `true` `false` `yes` `printf` `pwd` `basename` `dirname` `mkdir` `rmdir` `touch` `mv` `cp` `rm`              |
-| **POSIX text**         | `head` `tail` `wc` `tee` `tac` `rev` `tr` `cut` `sort` `uniq` `seq` `sleep` `expr` `test` (also `[`)                       |
-| **Heavy text / FS**    | `grep` (also `egrep`/`fgrep`) `sed` `awk` (also `gawk`/`nawk`) `find` `ls` `stat` `file` `du` `df` `chmod` `chown` `which` `xargs` `date` |
-| **Archives & hashing** | `tar` `gzip` `gunzip` `zip` `unzip` `sha256sum` `sha512sum` `md5sum` `base64`                                             |
+| **POSIX text**         | `head` `tail` `wc` `tee` `tac` `rev` `tr` `cut` `sort` `uniq` `seq` `sleep` `expr` `test` (also `[`) `expand` `unexpand`  |
+| **Heavy text / FS**    | `grep` (also `egrep`/`fgrep`) `sed` `awk` (also `gawk`/`nawk`) `find` `ls` `stat` `file` `du` `df` `chmod` `chown` `which` `xargs` `date` `realpath` `truncate` `unlink` `mktemp` |
+| **Archives & hashing / encoding** | `tar` `gzip` `gunzip` `zip` `unzip` `sha256sum` `sha512sum` `md5sum` `base64` `xxd`                            |
 | **Network & JSON**     | `curl` (also `wget`) `jq` `host` (also `nslookup`) `ping`                                                                  |
+| **Process & system**   | `time` `timeout` `nproc`                                                                                                  |
 | **Coreutils gap-fillers** | `env` `whoami` `id` `hostname` `uname` `ln` `readlink` `nl` `paste` `fold` `split` `factor` `shuf` `comm` `join` `sum` `column` `tsort` |
 
-74 registered names across 64 packages. `awk` and `jq` embed [`benhoyt/goawk`](https://github.com/benhoyt/goawk) and [`itchyny/gojq`](https://github.com/itchyny/gojq) respectively; everything else is built on the Go standard library.
+84 registered names across 74 packages. `awk` and `jq` embed [`benhoyt/goawk`](https://github.com/benhoyt/goawk) and [`itchyny/gojq`](https://github.com/itchyny/gojq) respectively; everything else is built on the Go standard library.
 
 Documented divergences from POSIX and from mainsail are listed in [`ARCHITECTURE.md`](ARCHITECTURE.md#documented-divergences-from-mainsail).
 

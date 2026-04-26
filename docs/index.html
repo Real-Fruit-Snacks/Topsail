@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0B1220">
 <title>topsail — Unix utilities, in one Go binary, anywhere</title>
-<meta name="description" content="A BusyBox-style multi-call binary in Go. 74 Unix utilities, one ~3 MB statically-linked executable, native on Linux, macOS, and Windows.">
+<meta name="description" content="A BusyBox-style multi-call binary in Go. 84 Unix utilities, one ~3 MB statically-linked executable, native on Linux, macOS, and Windows.">
 <meta property="og:title" content="topsail — Unix utilities, in one Go binary, anywhere">
-<meta property="og:description" content="A BusyBox-style multi-call binary in Go. 74 Unix utilities, one ~3 MB statically-linked executable, native on Linux, macOS, and Windows.">
+<meta property="og:description" content="A BusyBox-style multi-call binary in Go. 84 Unix utilities, one ~3 MB statically-linked executable, native on Linux, macOS, and Windows.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://real-fruit-snacks.github.io/topsail/">
 <meta property="og:image" content="https://raw.githubusercontent.com/Real-Fruit-Snacks/topsail/main/docs/assets/logo-dark.svg">
@@ -182,7 +182,7 @@
 
 <header class="hero">
   <img class="logo" src="assets/logo-dark.svg" alt="topsail">
-  <p class="tag">A BusyBox-style multi-call binary in Go. 74 Unix utilities, one ~3 MB statically-linked executable, native on Linux, macOS, and Windows.</p>
+  <p class="tag">A BusyBox-style multi-call binary in Go. 84 Unix utilities, one ~3 MB statically-linked executable, native on Linux, macOS, and Windows.</p>
   <div class="cta">
     <a class="btn primary" href="#download">Download</a>
     <a class="btn secondary" href="https://github.com/Real-Fruit-Snacks/topsail">View on GitHub</a>
@@ -191,7 +191,7 @@
 
 <section>
   <div class="grid-stats">
-    <div class="stat"><span class="num">74</span><span class="label">applet names</span></div>
+    <div class="stat"><span class="num">84</span><span class="label">applet names</span></div>
     <div class="stat"><span class="num">64</span><span class="label">Go packages</span></div>
     <div class="stat"><span class="num">6</span><span class="label">platform binaries</span></div>
     <div class="stat"><span class="num">~3 MB</span><span class="label">stripped binary</span></div>
@@ -263,7 +263,7 @@ copy topsail.exe ls.exe & ls -la  # copy dispatch (Windows)</code></pre>
 
 <section id="applets">
   <h2>Supported applets</h2>
-  <p>74 registered names across 64 packages. Documented divergences from POSIX / mainsail are listed in the <a href="https://github.com/Real-Fruit-Snacks/topsail/blob/main/ARCHITECTURE.md#documented-divergences-from-mainsail">architecture doc</a>.</p>
+  <p>84 registered names across 74 packages. Documented divergences from POSIX / mainsail are listed in the <a href="https://github.com/Real-Fruit-Snacks/topsail/blob/main/ARCHITECTURE.md#documented-divergences-from-mainsail">architecture doc</a>.</p>
   <table class="applets">
     <thead><tr><th>Category</th><th>Applets</th></tr></thead>
     <tbody>
@@ -273,19 +273,23 @@ copy topsail.exe ls.exe & ls -la  # copy dispatch (Windows)</code></pre>
       </tr>
       <tr>
         <th>POSIX text</th>
-        <td><code>head</code> <code>tail</code> <code>wc</code> <code>tee</code> <code>tac</code> <code>rev</code> <code>tr</code> <code>cut</code> <code>sort</code> <code>uniq</code> <code>seq</code> <code>sleep</code> <code>expr</code> <code>test</code> <code>[</code></td>
+        <td><code>head</code> <code>tail</code> <code>wc</code> <code>tee</code> <code>tac</code> <code>rev</code> <code>tr</code> <code>cut</code> <code>sort</code> <code>uniq</code> <code>seq</code> <code>sleep</code> <code>expr</code> <code>test</code> <code>[</code> <code>expand</code> <code>unexpand</code></td>
       </tr>
       <tr>
         <th>Heavy text / FS</th>
-        <td><code>grep</code> <code>egrep</code> <code>fgrep</code> <code>sed</code> <code>awk</code> <code>gawk</code> <code>nawk</code> <code>find</code> <code>ls</code> <code>stat</code> <code>file</code> <code>du</code> <code>df</code> <code>chmod</code> <code>chown</code> <code>which</code> <code>xargs</code> <code>date</code></td>
+        <td><code>grep</code> <code>egrep</code> <code>fgrep</code> <code>sed</code> <code>awk</code> <code>gawk</code> <code>nawk</code> <code>find</code> <code>ls</code> <code>stat</code> <code>file</code> <code>du</code> <code>df</code> <code>chmod</code> <code>chown</code> <code>which</code> <code>xargs</code> <code>date</code> <code>realpath</code> <code>truncate</code> <code>unlink</code> <code>mktemp</code></td>
       </tr>
       <tr>
-        <th>Archives &amp; hashing</th>
-        <td><code>tar</code> <code>gzip</code> <code>gunzip</code> <code>zip</code> <code>unzip</code> <code>sha256sum</code> <code>sha512sum</code> <code>md5sum</code> <code>base64</code></td>
+        <th>Archives &amp; hashing / encoding</th>
+        <td><code>tar</code> <code>gzip</code> <code>gunzip</code> <code>zip</code> <code>unzip</code> <code>sha256sum</code> <code>sha512sum</code> <code>md5sum</code> <code>base64</code> <code>xxd</code></td>
       </tr>
       <tr>
         <th>Network &amp; JSON</th>
         <td><code>curl</code> <code>wget</code> <code>jq</code> <code>host</code> <code>nslookup</code> <code>ping</code></td>
+      </tr>
+      <tr>
+        <th>Process &amp; system</th>
+        <td><code>time</code> <code>timeout</code> <code>nproc</code></td>
       </tr>
       <tr>
         <th>Coreutils gap-fillers</th>
@@ -319,8 +323,7 @@ applets/&lt;name&gt;/             one package per applet; init() registers; Main
   <p><a class="btn primary" href="https://github.com/Real-Fruit-Snacks/topsail/releases/latest">Latest release on GitHub</a></p>
   <h3>Verify a release</h3>
 <pre><code>cosign verify-blob \
-  --certificate checksums.txt.pem \
-  --signature   checksums.txt.sig \
+  --bundle checksums.txt.sigstore.json \
   --certificate-identity-regexp 'https://github.com/Real-Fruit-Snacks/topsail/.*' \
   --certificate-oidc-issuer    https://token.actions.githubusercontent.com \
   checksums.txt

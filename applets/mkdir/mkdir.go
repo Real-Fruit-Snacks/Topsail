@@ -1,4 +1,9 @@
 // Package mkdir implements the `mkdir` applet: make directories.
+//
+// Both octal and POSIX symbolic modes are supported via internal/filemode.
+// Symbolic modes are evaluated against a base of 0o777 per POSIX
+// ("an implied initial value of a=rwx"), so `mkdir -m u-x foo` yields
+// 0o677 and `mkdir -m a=rx foo` yields 0o555.
 package mkdir
 
 import (
@@ -6,10 +11,10 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/Real-Fruit-Snacks/topsail/internal/applet"
+	"github.com/Real-Fruit-Snacks/topsail/internal/filemode"
 	"github.com/Real-Fruit-Snacks/topsail/internal/ioutil"
 )
 
@@ -27,10 +32,12 @@ Create the DIRECTORY(ies), if they do not already exist.
 
 Options:
   -p, --parents       no error if existing, make parent directories as needed
-  -m, --mode=MODE     set file mode (octal), not a=rwx - umask
+  -m, --mode=MODE     set file mode (octal or symbolic), bypassing umask
   -v, --verbose       print a message for each created directory
 
-Symbolic mode strings (u+rwx, etc.) are not yet supported; use octal.
+MODE accepts both octal (e.g. 0755) and symbolic forms
+([ugoa]*[+-=][rwxXst]+[,...]). Symbolic modes apply on top of
+0o777 per POSIX, so "mkdir -m u-x foo" yields mode 0o677.
 `
 
 // Main is the applet entry point.
@@ -40,6 +47,17 @@ func Main(argv []string) int {
 		parents, verbose, modeSet bool
 		mode                      = os.FileMode(0o777)
 	)
+
+	parseAndStoreMode := func(s string) bool {
+		m, err := filemode.Parse(s, 0o777)
+		if err != nil {
+			ioutil.Errf("mkdir: invalid mode: %s", s)
+			return false
+		}
+		mode = m
+		modeSet = true
+		return true
+	}
 
 	stop := false
 	for !stop && len(args) > 0 {
@@ -59,23 +77,14 @@ func Main(argv []string) int {
 				ioutil.Errf("mkdir: option requires an argument -- 'm'")
 				return 2
 			}
-			m, err := parseMode(args[1])
-			if err != nil {
-				ioutil.Errf("mkdir: invalid mode: %s", args[1])
+			if !parseAndStoreMode(args[1]) {
 				return 2
 			}
-			mode = m
-			modeSet = true
 			args = args[2:]
 		case strings.HasPrefix(a, "--mode="):
-			val := a[len("--mode="):]
-			m, err := parseMode(val)
-			if err != nil {
-				ioutil.Errf("mkdir: invalid mode: %s", val)
+			if !parseAndStoreMode(a[len("--mode="):]) {
 				return 2
 			}
-			mode = m
-			modeSet = true
 			args = args[1:]
 		case strings.HasPrefix(a, "-") && len(a) > 1:
 			for _, c := range a[1:] {
@@ -125,13 +134,4 @@ func Main(argv []string) int {
 		}
 	}
 	return rc
-}
-
-// parseMode parses an octal file mode. Symbolic modes are not supported here.
-func parseMode(s string) (os.FileMode, error) {
-	n, err := strconv.ParseUint(s, 8, 32)
-	if err != nil {
-		return 0, err
-	}
-	return os.FileMode(n), nil
 }

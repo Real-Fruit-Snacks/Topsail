@@ -82,12 +82,15 @@ func TestTailHeaders(t *testing.T) {
 	}
 }
 
-func TestTailFollowRejected(t *testing.T) {
+func TestTailFollowStdinWarns(t *testing.T) {
+	// tail -f - has no real file to follow; we expect a diagnostic and a
+	// clean exit (the initial tail of stdin still happens).
+	testutil.SetStdin(t, "x\n")
 	_, errBuf := testutil.CaptureStdio(t)
-	if rc := Main([]string{"tail", "-f", "/dev/null"}); rc != 2 {
-		t.Errorf("rc = %d; want 2", rc)
+	if rc := Main([]string{"tail", "-f", "-"}); rc != 0 {
+		t.Errorf("rc = %d; want 0", rc)
 	}
-	if !strings.Contains(errBuf.String(), "not implemented") {
+	if !strings.Contains(errBuf.String(), "ineffective on standard input") {
 		t.Errorf("stderr = %q", errBuf.String())
 	}
 }

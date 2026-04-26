@@ -80,3 +80,60 @@ func TestChmodRecursive(t *testing.T) {
 		t.Errorf("nested mode = %o; want 0700", got)
 	}
 }
+
+func TestChmodSymbolicAdd(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("file modes not meaningful on Windows")
+	}
+	dir := t.TempDir()
+	p := filepath.Join(dir, "f")
+	if err := os.WriteFile(p, []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	testutil.CaptureStdio(t)
+	if rc := Main([]string{"chmod", "u+x", p}); rc != 0 {
+		t.Errorf("rc = %d", rc)
+	}
+	info, _ := os.Stat(p)
+	if got := info.Mode().Perm(); got != 0o744 {
+		t.Errorf("mode after u+x: got %o; want 0744", got)
+	}
+}
+
+func TestChmodSymbolicRemove(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("file modes not meaningful on Windows")
+	}
+	dir := t.TempDir()
+	p := filepath.Join(dir, "f")
+	if err := os.WriteFile(p, []byte("x"), 0o666); err != nil {
+		t.Fatal(err)
+	}
+	testutil.CaptureStdio(t)
+	if rc := Main([]string{"chmod", "go-w", p}); rc != 0 {
+		t.Errorf("rc = %d", rc)
+	}
+	info, _ := os.Stat(p)
+	if got := info.Mode().Perm(); got != 0o644 {
+		t.Errorf("mode after go-w: got %o; want 0644", got)
+	}
+}
+
+func TestChmodSymbolicEqualMulti(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("file modes not meaningful on Windows")
+	}
+	dir := t.TempDir()
+	p := filepath.Join(dir, "f")
+	if err := os.WriteFile(p, []byte("x"), 0o000); err != nil {
+		t.Fatal(err)
+	}
+	testutil.CaptureStdio(t)
+	if rc := Main([]string{"chmod", "u=rwx,go=rx", p}); rc != 0 {
+		t.Errorf("rc = %d", rc)
+	}
+	info, _ := os.Stat(p)
+	if got := info.Mode().Perm(); got != 0o755 {
+		t.Errorf("mode after u=rwx,go=rx: got %o; want 0755", got)
+	}
+}
