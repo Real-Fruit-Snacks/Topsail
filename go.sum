@@ -1,5 +1,9 @@
 github.com/benhoyt/goawk v1.31.0 h1:TSdLys1rAWvmb3befdmLYpaHZbTrYtS+JkBWRcNsMNM=
 github.com/benhoyt/goawk v1.31.0/go.mod h1:jXTQxBxtQ0VsjFqc8dw7tIJj3SDzQN8kcdMq7r83/ZA=
+github.com/itchyny/gojq v0.12.19 h1:ttXA0XCLEMoaLOz5lSeFOZ6u6Q3QxmG46vfgI4O0DEs=
+github.com/itchyny/gojq v0.12.19/go.mod h1:5galtVPDywX8SPSOrqjGxkBeDhSxEW1gSxoy7tn1iZY=
+github.com/itchyny/timefmt-go v0.1.8 h1:1YEo1JvfXeAHKdjelbYr/uCuhkybaHCeTkH8Bo791OI=
+github.com/itchyny/timefmt-go v0.1.8/go.mod h1:5E46Q+zj7vbTgWY8o5YkMeYb4I6GeWLFnetPy5oBrAI=
 golang.org/x/sys v0.43.0 h1:Rlag2XtaFTxp19wS8MXlJwTvoh8ArU6ezoyFsMyCTNI=
 golang.org/x/sys v0.43.0/go.mod h1:4GL1E5IUh+htKOUEOaiffhrAeqysfVGipDYzABqnCmw=
 golang.org/x/term v0.42.0 h1:UiKe+zDFmJobeJ5ggPwOshJIVt6/Ft0rcfrXZDLWAWY=
