@@ -25,7 +25,10 @@ jobs:
           cache: true
 
       - name: Install govulncheck
-        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+        # Pinned: x/vuln tracks the Go release cadence and @latest can pull
+        # a version that requires a Go newer than this job's toolchain.
+        # Bump in lockstep with the Go floor in go.mod / CONTRIBUTING.md.
+        run: go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
 
       - name: Run govulncheck
         run: govulncheck ./...
