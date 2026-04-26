@@ -1,32 +1,30 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 180" width="760" height="180" role="img" aria-label="topsail">
-  <title>topsail</title>
-  <desc>The topsail logo: a stylized mast with a highlighted topsail above a muted mainsail, beside the "topsail" wordmark and tagline.</desc>
-
-  <!-- Mast and sails -->
-  <g transform="translate(28 22)">
-    <!-- Mast -->
-    <line x1="24" y1="0" x2="24" y2="132" stroke="#00ADD8" stroke-width="3.2" stroke-linecap="round"/>
-    <!-- Yard (topsail spar) -->
-    <line x1="6" y1="6" x2="42" y2="6" stroke="#00ADD8" stroke-width="2.8" stroke-linecap="round"/>
-    <!-- Topsail (highlighted; this is the named sail) -->
-    <path d="M 26 8 L 26 58 L 104 36 Z" fill="#00ADD8"/>
-    <!-- Mainsail (muted to keep visual emphasis on the topsail) -->
-    <path d="M 26 66 L 26 130 L 124 106 Z" fill="#00ADD8" fill-opacity="0.32"/>
-    <!-- Waterline -->
-    <path d="M -4 138 Q 70 144 144 138" stroke="#00ADD8" stroke-width="1.6" fill="none" stroke-opacity="0.6"/>
-  </g>
-
-  <!-- Wordmark -->
-  <g transform="translate(176 0)">
-    <text x="0" y="92"
-          font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace"
-          font-size="68"
-          font-weight="700"
-          fill="#F8FAFC">topsail</text>
-    <text x="3" y="128"
-          font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
-          font-size="18"
-          fill="#94A3B8">84 Unix utilities · one static Go binary · everywhere</text>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" fill="none">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#74c7ec"/>
+      <stop offset="50%" stop-color="#89b4fa"/>
+      <stop offset="100%" stop-color="#b4befe"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="40%">
+      <stop offset="0%" stop-color="#74c7ec" stop-opacity="0.10"/>
+      <stop offset="50%" stop-color="#89b4fa" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#b4befe" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="textglow">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <ellipse cx="260" cy="45" rx="220" ry="40" fill="url(#glow)"/>
+  <text x="260" y="52" text-anchor="middle"
+        font-family="'Inter', 'SF Pro Display', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+        font-size="48" font-weight="800" fill="url(#grad)" letter-spacing="6"
+        filter="url(#textglow)">TOPSAIL</text>
+  <line x1="160" y1="68" x2="360" y2="68" stroke="url(#grad)" stroke-width="0.6" opacity="0.2"/>
+  <text x="260" y="84" text-anchor="middle"
+        font-family="'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace"
+        font-size="10" font-weight="400" fill="#7f849c" letter-spacing="5">UNIX UTILITIES, IN ONE BINARY</text>
+  <text x="260" y="100" text-anchor="middle"
+        font-family="'JetBrains Mono', 'SF Mono', 'Fira Code', monospace"
+        font-size="7.5" font-weight="400" fill="#585b70" letter-spacing="3">GO  ·  84 APPLETS  ·  LINUX  ·  MACOS  ·  WINDOWS</text>
 </svg>
