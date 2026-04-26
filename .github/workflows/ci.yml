@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+      - name: go mod tidy drift
+        run: |
+          cp go.mod go.mod.bak
+          [ -f go.sum ] && cp go.sum go.sum.bak || true
+          go mod tidy
+          drift=0
+          diff -q go.mod go.mod.bak >/dev/null 2>&1 || drift=1
+          if [ -f go.sum.bak ]; then
+            diff -q go.sum go.sum.bak >/dev/null 2>&1 || drift=1
+          fi
+          if [ $drift -ne 0 ]; then
+            echo "::error::go.mod / go.sum drift; run 'make tidy'"
+            exit 1
+          fi
+      - name: goimports formatting
+        run: |
+          go install golang.org/x/tools/cmd/goimports@latest
+          diff=$(goimports -l -local github.com/Real-Fruit-Snacks/topsail .)
+          if [ -n "$diff" ]; then
+            echo "::error::Formatting drift (run 'make fmt'):"
+            echo "$diff"
+            exit 1
+          fi
+      - name: go vet
+        run: go vet ./...
+      - uses: golangci/golangci-lint-action@v6
+        with:
+          version: v2.1.6
+          args: --timeout=5m
+
+  test:
+    name: Test (${{ matrix.os }} / Go ${{ matrix.go }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        go: ['1.23', '1.24']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          cache: true
+      - run: go test -race -cover -covermode=atomic ./...
+
+  build:
+    name: Build ${{ matrix.target.goos }}/${{ matrix.target.goarch }}
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - { goos: linux,   goarch: amd64 }
+          - { goos: linux,   goarch: arm64 }
+          - { goos: darwin,  goarch: amd64 }
+          - { goos: darwin,  goarch: arm64 }
+          - { goos: windows, goarch: amd64 }
+          - { goos: windows, goarch: arm64 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+      - name: cross-compile
+        env:
+          CGO_ENABLED: '0'
+          GOOS: ${{ matrix.target.goos }}
+          GOARCH: ${{ matrix.target.goarch }}
+        run: |
+          ext=""
+          [ "$GOOS" = "windows" ] && ext=".exe"
+          go build -trimpath -ldflags="-s -w" \
+            -o "/tmp/topsail-${GOOS}-${GOARCH}${ext}" \
+            ./cmd/topsail

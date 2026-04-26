@@ -1,0 +1,102 @@
+version: 2
+
+project_name: topsail
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: topsail
+    main: ./cmd/topsail
+    binary: topsail
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/Real-Fruit-Snacks/topsail/internal/cli.Version={{.Version}}
+      - -X github.com/Real-Fruit-Snacks/topsail/internal/cli.Commit={{.Commit}}
+      - -X github.com/Real-Fruit-Snacks/topsail/internal/cli.Date={{.Date}}
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: '{{ .CommitTimestamp }}'
+
+archives:
+  - id: default
+    formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - '^ci:'
+      - 'Merge pull request'
+      - 'Merge branch'
+
+sboms:
+  - id: archive
+    artifacts: archive
+
+signs:
+  - id: checksum
+    cmd: cosign
+    signature: '${artifact}.sig'
+    certificate: '${artifact}.pem'
+    args:
+      - sign-blob
+      - '--output-certificate=${certificate}'
+      - '--output-signature=${signature}'
+      - '${artifact}'
+      - '--yes'
+    artifacts: checksum
+    output: true
+
+release:
+  github:
+    owner: Real-Fruit-Snacks
+    name: topsail
+  draft: false
+  prerelease: auto
+  mode: append
+  header: |
+    ## topsail {{ .Tag }}
+
+    Single-file BusyBox-like multi-call binary, in Go.
+  footer: |
+    **Verifying signatures (cosign keyless):**
+
+    ```bash
+    cosign verify-blob \
+      --certificate checksums.txt.pem \
+      --signature   checksums.txt.sig \
+      --certificate-identity-regexp 'https://github.com/Real-Fruit-Snacks/topsail/.*' \
+      --certificate-oidc-issuer    https://token.actions.githubusercontent.com \
+      checksums.txt
+    ```
