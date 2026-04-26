@@ -202,9 +202,14 @@ func TestRunMultiCallDispatchAlias(t *testing.T) {
 }
 
 func TestRunMultiCallStripsExe(t *testing.T) {
+	// argv[0]="echo.exe" (no directory) is the cross-platform case: on
+	// every OS, filepath.Base returns "echo.exe" verbatim, then our
+	// dispatcher strips the .exe suffix and matches the registered
+	// applet. Paths with backslashes are intentionally not exercised
+	// here because they're only separators on Windows.
 	registerEcho(t)
 	out, _ := captureStdio(t)
-	if rc := Run([]string{`C:\bin\echo.exe`, "windows", "path"}); rc != ExitSuccess {
+	if rc := Run([]string{"echo.exe", "windows", "path"}); rc != ExitSuccess {
 		t.Errorf("rc = %d; want %d", rc, ExitSuccess)
 	}
 	if got := strings.TrimSpace(out.String()); got != "windows path" {
